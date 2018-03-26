@@ -6,9 +6,9 @@ void Solver::solve(const Problem &problem)
 
 #   ifdef DEBUG
     store_vector(m, "m.plt", problem.nodes() * 2, problem.step(),
-        -problem.R(), problem.accurancy());
+        0.0, problem.accurancy());
     store_vector(w, "w.plt", problem.nodes() * 2, problem.step(),
-        -problem.R(), problem.accurancy());
+        0.0, problem.accurancy());
 #   endif
 
     for(int i = 0; i < problem.iters(); i++){
@@ -18,13 +18,13 @@ void Solver::solve(const Problem &problem)
 
 #       ifdef DEBUG
         store_vector(C, "C.plt", problem.nodes() * 2, problem.step(),
-            -problem.R(), problem.accurancy());
+            0.0, problem.accurancy());
         store_vector(wC, "wC.plt", problem.nodes() * 2, problem.step(),
-            -problem.R(), problem.accurancy());
+            0.0, problem.accurancy());
         store_vector(mC, "mC.plt", problem.nodes() * 2, problem.step(),
-            -problem.R(), problem.accurancy());
+            0.0, problem.accurancy());
         store_vector(CwC, "CwC.plt", problem.nodes() * 2, problem.step(),
-            -problem.R(), problem.accurancy());
+            0.0, problem.accurancy());
 #       endif
 
         for(int j = 0; j < problem.nodes(); j++){
@@ -86,8 +86,8 @@ void Solver::getVectors(const Problem &problem)
     double x = -problem.R();
 
     for(int i = 0; i < problem.nodes(); i++){
-        m[i] = problem.getKernels().m(x);
-        C[i] = w[i] = problem.getKernels().w(x);
+        m[i] = problem.b() * problem.getKernels().m(x);
+        C[i] = w[i] = problem.s() * problem.getKernels().w(x);
         x += problem.step();
     }
 
