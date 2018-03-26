@@ -1,0 +1,8 @@
+*.o
+neuman
+*.plt
+*.tmp
+.*.vim
+.*.swp
+*.sh
+*.gnu
