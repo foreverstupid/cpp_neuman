@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "kernels.hpp"
-#include "str.h"
+#include "string_operations.hpp"
 
 
 
@@ -23,6 +23,7 @@ class Problem{
     int n_count;        /* nodes count */
     double _R;          /* integration segment */
     double _step;       /* step between nodes */
+    int dim;            /* dimension of space */
 
     int acc;            /* output accurancy */
     const char *_path;  /* path for storing data */
@@ -49,10 +50,15 @@ public:
     int nodes() const { return n_count; }
     double R() const { return _R; }
     double step() const { return _step; }
+    int dimension() const { return dim; }
     int accurancy() const { return acc; }
     const char *path() const { return _path; }
 
 private:
+    bool isNumArg(const char *str)
+    {
+        return str[0] == '-' && isNumber(str + 1);
+    }
     int handleArgument(int *i, char **argv);
     int setKernels(int *i, char **argv);
 };

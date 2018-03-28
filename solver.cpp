@@ -1,42 +1,42 @@
 #include "solver.hpp"
 
-void Solver::solve(const Problem &problem)
+void Solver::solve(const Problem &p)
 {
-    init(problem);
+    init(p);
 
 #   ifdef DEBUG
-    store_vector(m, "m.plt", problem.nodes() * 2, problem.step(),
-        0.0, problem.accurancy());
-    store_vector(w, "w.plt", problem.nodes() * 2, problem.step(),
-        0.0, problem.accurancy());
+    VectorHandler::storeVector(m, "m.plt", p.nodes() * 2, p.step(), 0.0,
+        p.accurancy());
+    VectorHandler::storeVector(w, "w.plt", p.nodes() * 2, p.step(), 0.0,
+        p.accurancy());
 #   endif
 
-    for(int i = 0; i < problem.iters(); i++){
-        N = (problem.b() - problem.d()) /
-            (get_dot(C, w, problem.nodes(), problem.step()) + problem.s());
-        getConvolutions(problem);
+    for(int i = 0; i < p.iters(); i++){
+        N = (p.b() - p.d()) /
+            (vh.getDot(C, w, p.nodes(), p.step(), -p.R()) + p.s());
+        getConvolutions(p);
 
 #       ifdef DEBUG
-        store_vector(C, "C.plt", problem.nodes() * 2, problem.step(),
-            0.0, problem.accurancy());
-        store_vector(wC, "wC.plt", problem.nodes() * 2, problem.step(),
-            0.0, problem.accurancy());
-        store_vector(mC, "mC.plt", problem.nodes() * 2, problem.step(),
-            0.0, problem.accurancy());
-        store_vector(CwC, "CwC.plt", problem.nodes() * 2, problem.step(),
-            0.0, problem.accurancy());
+        VectorHandler::storeVector(C, "C.plt", p.nodes() * 2,
+            p.step(), 0.0, p.accurancy());
+        VectorHandler::storeVector(wC, "wC.plt", p.nodes() * 2,
+            p.step(), 0.0, p.accurancy());
+        VectorHandler::storeVector(mC, "mC.plt", p.nodes() * 2,
+            p.step(), 0.0, p.accurancy());
+        VectorHandler::storeVector(CwC, "CwC.plt", p.nodes() * 2,
+            p.step(), 0.0, p.accurancy());
 #       endif
 
-        for(int j = 0; j < problem.nodes(); j++){
-            C[j] = (m[j] / N - w[j] + mC[j] - problem.alpha() / 2 * N *
+        for(int j = 0; j < p.nodes(); j++){
+            C[j] = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
                 ((C[j] + 2) * wC[j] + CwC[j])) /
-                (w[j] + problem.b() - problem.alpha() / 2 *
-                (problem.b() - problem.d() - problem.s() * N));
+                (w[j] + p.b() - p.alpha() / 2 *
+                (p.b() - p.d() - p.s() * N));
         }
     }
 
     /* correcting second moment */
-    for(int i = 0; i < problem.nodes(); i++){
+    for(int i = 0; i < p.nodes(); i++){
         C[i]++;
     }
 
@@ -45,9 +45,10 @@ void Solver::solve(const Problem &problem)
 
 
 
-void Solver::init(const Problem &problem)
+void Solver::init(const Problem &p)
 {
-    int n = problem.nodes();
+    int n = p.nodes();
+    vh = VectorHandler(p.dimension());
 
     w = new double[n * 2];
     m = new double[n * 2];
@@ -75,23 +76,23 @@ void Solver::init(const Problem &problem)
     backward_CwC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, CwC,
         FFTW_ESTIMATE);
 
-    getVectors(problem);
+    getVectors(p);
     getMWFFT(n);
 }
 
 
 
-void Solver::getVectors(const Problem &problem)
+void Solver::getVectors(const Problem &p)
 {
-    double x = -problem.R();
+    double x = -p.R();
 
-    for(int i = 0; i < problem.nodes(); i++){
-        m[i] = problem.b() * problem.getKernels().m(x);
-        C[i] = w[i] = problem.s() * problem.getKernels().w(x);
-        x += problem.step();
+    for(int i = 0; i < p.nodes(); i++){
+        m[i] = p.b() * p.getKernels().m(x);
+        C[i] = w[i] = p.s() * p.getKernels().w(x);
+        x += p.step();
     }
 
-    for(int i = problem.nodes(); i < 2 * problem.nodes(); i++){
+    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
         m[i] = w[i] = w_mult_C[i] = C[i] = wC[i] = mC[i] = CwC[i] = 0.0;
     }
 }
@@ -100,8 +101,10 @@ void Solver::getVectors(const Problem &problem)
 
 void Solver::getMWFFT(int n)
 {
-    fftw_plan m_plan = fftw_plan_dft_r2c_1d(n * 2, m, fft_m, FFTW_ESTIMATE);
-    fftw_plan w_plan = fftw_plan_dft_r2c_1d(n * 2, w, fft_w, FFTW_ESTIMATE);
+    fftw_plan m_plan = fftw_plan_dft_r2c_1d(n * 2, m, fft_m,
+        FFTW_ESTIMATE);
+    fftw_plan w_plan = fftw_plan_dft_r2c_1d(n * 2, w, fft_w,
+        FFTW_ESTIMATE);
 
     fftw_execute(m_plan);
     fftw_execute(w_plan);
@@ -138,40 +141,40 @@ void Solver::clear()
 
 
 
-void Solver::getConvolutions(const Problem &problem)
+void Solver::getConvolutions(const Problem &p)
 {
-    mul_vecs(C, w, w_mult_C, problem.nodes());
+    VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
 
-    for(int i = problem.nodes(); i < 2 * problem.nodes(); i++){
+    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
         w_mult_C[i] = C[i] = 0;
     }
 
 #   ifdef DEBUG
-    store_vector(w_mult_C, "w_C.plt", problem.nodes() * 2,
-        problem.step(), -problem.R(), problem.accurancy());
+    VectorHandler::storeVector(w_mult_C, "w_C.plt", p.nodes() * 2,
+        p.step(), -p.R(), p.accurancy());
 #   endif
 
     fftw_execute(forward_C);
     fftw_execute(forward_wC);
 
-    convolve(tmp_C, fft_m, backward_mC, mC, problem);
-    convolve(tmp_C, fft_w, backward_wC, wC, problem);
-    convolve(tmp_wC, tmp_C, backward_CwC, CwC, problem);
+    convolve(tmp_C, fft_m, backward_mC, mC, p);
+    convolve(tmp_C, fft_w, backward_wC, wC, p);
+    convolve(tmp_wC, tmp_C, backward_CwC, CwC, p);
 
-    shift_left(mC, problem.nodes(), problem.nodes() / 2);
-    shift_left(wC, problem.nodes(), problem.nodes() / 2);
-    shift_left(CwC, problem.nodes(), problem.nodes() / 2);
+    VectorHandler::shiftLeft(mC, p.nodes(), p.nodes() / 2);
+    VectorHandler::shiftLeft(wC, p.nodes(), p.nodes() / 2);
+    VectorHandler::shiftLeft(CwC, p.nodes(), p.nodes() / 2);
 }
 
 
 
-void Solver::convolve(fftw_complex *f, fftw_complex *g, fftw_plan &p,
-    double *res, const Problem &problem)
+void Solver::convolve(const fftw_complex *f, const fftw_complex *g,
+    const fftw_plan &plan, double *res, const Problem &p)
 {
     double re;
     double im;
 
-    for(int i = 0; i < problem.nodes() + 1; i++){
+    for(int i = 0; i < p.nodes() + 1; i++){
         re = f[i][0] * g[i][0] - f[i][1] * g[i][1];
         im = f[i][0] * g[i][1] + f[i][1] * g[i][0];
 
@@ -179,9 +182,9 @@ void Solver::convolve(fftw_complex *f, fftw_complex *g, fftw_plan &p,
         tmp_back[i][1] = im;
     }
 
-    fftw_execute(p);
+    fftw_execute(plan);
 
-    for(int i = 0; i < problem.nodes() * 2; i++){
-        res[i] *= problem.step() / (problem.nodes() * 2);
+    for(int i = 0; i < p.nodes() * 2; i++){
+        res[i] *= p.step() / (p.nodes() * 2);
     }
 }

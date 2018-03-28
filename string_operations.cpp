@@ -1,16 +1,38 @@
-#include "str.h"
+#include "string_operations.hpp"
 
-/* convert string to integer */
+bool isNumber(const char *str)
+{
+    bool wasPoint = false;
+
+    for(int i = 0; str[i]; i++){
+        if(str[i] == '.'){
+            if(!wasPoint){
+                wasPoint = true;
+                continue;
+            }else{
+                return false;
+            }
+        }
+
+        if(str[i] < '0' || str[i] > '9'){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+
 int str2int(const char *str)
 {
-    int i;
     int res = 0;
 
     if(!str){
         return 0;
     }
 
-    for(i = 0; str[i]; i++){
+    for(int i = 0; str[i]; i++){
         res *= 10;
         res += str[i] - '0';
     }
@@ -20,7 +42,6 @@ int str2int(const char *str)
 
 
 
-/* convert string to double */
 double str2double(const char *str)
 {
     int i;
@@ -44,4 +65,5 @@ double str2double(const char *str)
     }
 
     return res;
+
 }

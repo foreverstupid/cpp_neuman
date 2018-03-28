@@ -16,6 +16,7 @@ Problem::Problem()
     _R = 20.0;
     n_count = 5000;
     i_count = 1000;
+    dim = 1;
 
     _path = default_path;
     acc = 3;
@@ -93,9 +94,17 @@ int Problem::handleArgument(int *i, char **argv)
         case 'h':
             return help;
         default:
-            fprintf(stderr, "### Unknown argument '%s'\n",
-                argv[*i]);
-            return error;
+            if(isDigit(argv[*i][1])){
+                dim = argv[*i][1] - '0';
+                if(dim > 3 || dim < 1){
+                    fprintf(stderr, "### Wrong dimension\n");
+                    return error;
+                }
+            }else{
+                fprintf(stderr, "### Unknown argument '%s'\n",
+                    argv[*i]);
+                return error;
+            }
     }
 
     *i += 2;
@@ -106,7 +115,7 @@ int Problem::handleArgument(int *i, char **argv)
 
 int Problem::setKernels(int *i, char **argv)
 {
-    if(!is_num_arg(argv[*i + 1]) || !is_num_arg(argv[*i + 2])){
+    if(!isNumArg(argv[*i + 1]) || !isNumArg(argv[*i + 2])){
         fprintf(stderr, "### Invalid kernel parameters\n");
         return error;
     }

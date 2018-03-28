@@ -107,8 +107,9 @@ int main(int argc, char **argv)
     printf("First moment: %15.*lf\n", equation.accurancy(), answer.N());
 
     if(equation.path()){
-        store_vector(answer.C(), equation.path(), equation.nodes(),
-            equation.step(), -equation.R(), equation.accurancy());
+        VectorHandler::storeVector(answer.C(), equation.path(),
+            equation.nodes(), equation.step(), -equation.R(),
+            equation.accurancy());
     }
 
     return 0;

@@ -4,12 +4,14 @@
 #include <math.h>
 #include <fftw3.h>
 #include "problem.hpp"
-#include "vecs.h"
+#include "vector_handler.hpp"
 
 
 
 /* solves problem */
 class Solver{
+    VectorHandler vh;       /* object for vector operations */
+
     double N;               /* first moment */
     double *C;              /* second moment */
 
@@ -35,7 +37,7 @@ class Solver{
 
 public:
     /* solve current problem */
-    void solve(const Problem &problem);
+    void solve(const Problem &p);
 
     /* return solution and info about output */
     Result getResult() const
@@ -45,23 +47,23 @@ public:
 
 private:
     /* init new solving process */
-    void init(const Problem &problem);
+    void init(const Problem &p);
 
     /* dispose resources after solving process finish */
     void clear();
 
     /* get zero padded samples of birth and death kernels and for C */
-    void getVectors(const Problem &problem);
+    void getVectors(const Problem &p);
 
     /* compute FFT of birth and death kernel */
     void getMWFFT(int n);
 
     /* recompute needed convolutions */
-    void getConvolutions(const Problem &problem);
+    void getConvolutions(const Problem &p);
 
     /* convolving function */
-    void convolve(fftw_complex *f, fftw_complex *g, fftw_plan &b,
-        double *res, const Problem &problem);
+    void convolve(const fftw_complex *f, const fftw_complex *g,
+        const fftw_plan &plan, double *res, const Problem &p);
 };
 
 #endif
