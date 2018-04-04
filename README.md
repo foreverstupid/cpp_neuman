@@ -18,6 +18,8 @@ programm.
 
     -DBAR_WIDTH=70 - set a progress bar width in characters. Default - 70.
 
+    -DBAR_CHAR=\'#\' - set a progress bar character. Default - '#'.
+
 ## Building:
     
 >make
@@ -35,7 +37,7 @@ programm.
 
     -i - set iteration count (positive integer). Default: 1000.
 
-    -n - set node count (positive even integer). Default: 5000.
+    -n - set node count (positive integer). Default: 5000.
 
     -r - set integration segment [-r; r] (real). Default: 20.0.
 

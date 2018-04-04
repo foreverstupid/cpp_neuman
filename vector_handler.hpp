@@ -26,8 +26,8 @@ public:
     const int getDimension() const { return dim; }
 
     /* get integral dot product */
-    double getDot(const double *f, const double *g, int size, double origin,
-        double step);
+    double getDot(const double *f, const double *g, int size, double step,
+        double origin);
 
     /* return integral norm of vecor */
     double getIntNorm(const double *f, int size, double origin,

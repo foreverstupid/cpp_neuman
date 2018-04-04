@@ -1,7 +1,7 @@
 #include "vector_handler.hpp"
 
 double VectorHandler::getDot(const double *f, const double *g, int size,
-    double origin, double step)
+    double step, double origin)
 {
     double res = 0.0;
     double x = origin;
