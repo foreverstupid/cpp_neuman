@@ -5,11 +5,29 @@
 #include <fftw3.h>
 #include "problem.hpp"
 #include "vector_handler.hpp"
+#ifdef DEBUG
+#include <stdio.h>
+#endif
+
+#if defined(SHOUT) && !defined(ASCETIC)
+
+#ifndef BAR_WIDTH
+#define BAR_WIDTH 70
+#endif
+
+#ifndef BAR_CHAR
+#define BAR_CHAR '#'
+#endif
+
+#endif
 
 
 
 /* solves problem */
 class Solver{
+#   if defined(SHOUT) && !defined(ASCETIC)
+    int bar_chars;          /* for progress bar */
+#   endif
     VectorHandler vh;       /* object for vector operations */
 
     double N;               /* first moment */
@@ -36,14 +54,11 @@ class Solver{
     fftw_plan backward_CwC;
 
 public:
-    /* solve current problem */
-    void solve(const Problem &p);
+    Solver(){ C = 0; }
+    ~Solver(){ if(C){ delete[] C; } }
 
-    /* return solution and info about output */
-    Result getResult() const
-    {
-        return Result(N, C);
-    }
+    /* solve current problem */
+    Result solve(const Problem &p);
 
 private:
     /* init new solving process */

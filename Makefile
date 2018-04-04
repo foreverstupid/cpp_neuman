@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -O3
+CFLAGS=-Wall -O3 -fno-exceptions -DSHOUT -DBAR_CHAR=\'*\'
 LIBS=-lm -lfftw3
 LDFLAGS=
 

@@ -31,7 +31,8 @@ class Problem{
 
 public:
     enum{
-        success, help, error
+        success, help, unknown_arg_error, empty_arg_error, dim_error,
+        expected_arg_error, kernel_params_error, kernel_type_error
     };
 
     Problem();
@@ -55,10 +56,6 @@ public:
     const char *path() const { return _path; }
 
 private:
-    bool isNumArg(const char *str)
-    {
-        return str[0] == '-' && isNumber(str + 1);
-    }
     int handleArgument(int *i, char **argv);
     int setKernels(int *i, char **argv);
 };
@@ -68,13 +65,23 @@ private:
 /* holds info about solution */
 class Result{
     double _N;
+    int dim;
+    int n_count;
     const double *_C;
 
 public:
-    Result(double N, const double *C) : _N(N) { _C = C; }
+    Result(double N, const double *C, int n, int dim)
+        : _N(N), dim(dim), n_count(n)
+    {
+        _C = C;
+    }
 
     double N() const { return _N; }
     const double *C() const { return _C; }
+    double getC0() const
+    {
+        return dim == 1 ? _C[n_count / 2] : _C[0];
+    }
 };
 
 #endif

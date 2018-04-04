@@ -31,13 +31,14 @@ int Problem::init(int argc, char **argv)
 
     while(i < argc){
         if(argv[i][0] != '-'){
-            fprintf(stderr, "### Unknown argument: '%s'\n", argv[i]);
-            return error;
+            fprintf(stderr, "### Expected argument, but get: '%s'\n",
+                argv[i]);
+            return expected_arg_error;
         }
 
         if(argv[i][1] != 'h' && !argv[i + 1]){
             fprintf(stderr, "### Empty value after '%s'\n", argv[i]);
-            return error;
+            return empty_arg_error;
         }
 
         if((res = handleArgument(&i, argv)) != success){
@@ -98,12 +99,12 @@ int Problem::handleArgument(int *i, char **argv)
                 dim = argv[*i][1] - '0';
                 if(dim > 3 || dim < 1){
                     fprintf(stderr, "### Wrong dimension\n");
-                    return error;
+                    return dim_error;
                 }
             }else{
                 fprintf(stderr, "### Unknown argument '%s'\n",
                     argv[*i]);
-                return error;
+                return unknown_arg_error;
             }
     }
 
@@ -115,9 +116,9 @@ int Problem::handleArgument(int *i, char **argv)
 
 int Problem::setKernels(int *i, char **argv)
 {
-    if(!isNumArg(argv[*i + 1]) || !isNumArg(argv[*i + 2])){
+    if(!isNumber(argv[*i + 1]) || !isNumber(argv[*i + 2])){
         fprintf(stderr, "### Invalid kernel parameters\n");
-        return error;
+        return kernel_params_error;
     }
 
     switch(argv[*i][2]){
@@ -141,7 +142,7 @@ int Problem::setKernels(int *i, char **argv)
             break;
         default:
             fprintf(stderr, "### Unknown kernel type '%s'\n", argv[*i]);
-            return error;
+            return kernel_type_error;
     }
 
     *i += 1;

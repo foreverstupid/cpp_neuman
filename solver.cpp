@@ -1,8 +1,13 @@
 #include "solver.hpp"
 
-void Solver::solve(const Problem &p)
+Result Solver::solve(const Problem &p)
 {
     init(p);
+#   if defined(SHOUT) && !defined(ASCETIC)
+    printf("Progress: ");
+    bar_chars = 0;
+    fflush(stdout);
+#   endif
 
 #   ifdef DEBUG
     VectorHandler::storeVector(m, "m.plt", p.nodes() * 2, p.step(), 0.0,
@@ -15,6 +20,19 @@ void Solver::solve(const Problem &p)
         N = (p.b() - p.d()) /
             (vh.getDot(C, w, p.nodes(), p.step(), -p.R()) + p.s());
         getConvolutions(p);
+
+#       ifndef ASCETIC
+#       ifndef SHOUT
+        printf("Iteration: %d\nN: %.*lf\n", i + 1,
+            p.accurancy(), N);
+#       else
+        while(bar_chars < (double)BAR_WIDTH * i / p.iters()){
+            putchar(BAR_CHAR);
+            bar_chars++;
+        }
+        fflush(stdout);
+#       endif
+#       endif
 
 #       ifdef DEBUG
         VectorHandler::storeVector(C, "C.plt", p.nodes() * 2,
@@ -40,7 +58,16 @@ void Solver::solve(const Problem &p)
         C[i]++;
     }
 
+#   if defined(SHOUT) && !defined(ASCETIC)
+    for(; bar_chars < BAR_WIDTH; bar_chars++){
+        putchar('#');
+    }
+    putchar('\n');
+#   endif
+
     clear();
+
+    return Result(N, C, p.nodes(), p.dimension());
 }
 
 
@@ -52,6 +79,9 @@ void Solver::init(const Problem &p)
 
     w = new double[n * 2];
     m = new double[n * 2];
+    if(C){
+        delete[] C;
+    }
     C = new double[n * 2];
 
     mC = new double[n * 2];

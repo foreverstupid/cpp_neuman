@@ -1,27 +1,26 @@
 #include <stdio.h>
 #include "solver.hpp"
 #include "problem.hpp"
-#include "vecs.h"
 #ifdef DEBUG
 #include "kernels.hpp"
 #endif
 
 #define REFERENCE_MESSAGE "List of possible cmd arguments:\n" \
-"-k*   - set kernel type, where * is one of letters:\n" \
+"-k*   - set kernel type, where * is one of the letters:\n" \
 "    n - normal kernels\n" \
-"    k - kurtosic kernels\n" \
+"    k - kurtic kernels\n" \
 "    e - exponential Danchencko kernels\n" \
 "After kernel type you must write kernel parameters:\n\n" \
 "    birth and death kernel dispertion for normal kernels\n" \
-"    s0 and s1 parameters for kurtosic kernels\n" \
+"    s0 and s1 parameters for kurtic kernels\n" \
 "    A and B parameters for Danchencko kernels\n\n" \
-"-a    - alpha parameter of clousure\n" \
+"-a    - alpha parameter of closure\n" \
 "-d    - environment death parameter\n" \
 "-b    - kind birth parameter\n" \
 "-s    - kind death parameter\n" \
 "-r    - size of area\n" \
 "-i    - iteration count\n" \
-"-p    - path to store data\n" \
+"-p    - path to store data (give 'n' to not create a data file)\n" \
 "-n    - grid node count\n" \
 "-e    - accurancy in signs after point\n" \
 "-h    - show this help\n"
@@ -82,6 +81,7 @@ void showArgs(const Problem &problem)
 #endif
 
 
+
 int main(int argc, char **argv)
 {
     int status;
@@ -101,10 +101,16 @@ int main(int argc, char **argv)
 #   endif
 
     Solver solver;
-    solver.solve(equation);
-    Result answer = solver.getResult();
+    Result answer = solver.solve(equation);
 
-    printf("First moment: %15.*lf\n", equation.accurancy(), answer.N());
+#ifdef ASCETIC
+    printf("%15.*lf %15.*lf\n", equation.accurancy(), answer.N(),
+    equation.accurancy(), answer.getC0());
+#else
+    printf("First moment: %.*lf\nC(0) = %.*lf\n",
+        equation.accurancy(), answer.N(), equation.accurancy(),
+        answer.getC0());
+#endif
 
     if(equation.path()){
         VectorHandler::storeVector(answer.C(), equation.path(),
