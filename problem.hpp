@@ -16,12 +16,13 @@ class Problem{
     double _b;          /* birth rate */
     double _s;          /* competition rate */
     double _d;          /* death rate */
-
     double _alpha;      /* closure parameter */
 
     int i_count;        /* iteration count */
     int n_count;        /* nodes count */
-    double _R;          /* integration segment */
+
+    double orgn;        /* origin for integration */
+    double _R;          /* integration limit */
     double _step;       /* step between nodes */
     int dim;            /* dimension of space */
 
@@ -49,6 +50,7 @@ public:
     double alpha() const { return _alpha; }
     int iters() const { return i_count; }
     int nodes() const { return n_count; }
+    double origin() const { return orgn; }
     double R() const { return _R; }
     double step() const { return _step; }
     int dimension() const { return dim; }
@@ -80,7 +82,7 @@ public:
     const double *C() const { return _C; }
     double getC0() const
     {
-        return dim == 1 ? _C[n_count / 2] : _C[0];
+        return dim == 1 ? _C[0] : _C[0];
     }
 };
 

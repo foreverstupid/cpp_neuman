@@ -1,6 +1,9 @@
 #include "solver.hpp"
 
-Result Solver::solve(const Problem &p)
+/*====================================================================*/
+/*                      ABSTRACT SOLVER METHODS                       */
+/*====================================================================*/
+Result AbstractSolver::solve(const Problem &p)
 {
     init(p);
 #   if defined(SHOUT) && !defined(ASCETIC)
@@ -10,15 +13,15 @@ Result Solver::solve(const Problem &p)
 #   endif
 
 #   ifdef DEBUG
-    VectorHandler::storeVector(m, "m.plt", p.nodes() * 2, p.step(), 0.0,
-        p.accurancy());
-    VectorHandler::storeVector(w, "w.plt", p.nodes() * 2, p.step(), 0.0,
-        p.accurancy());
+    VectorHandler::storeVector(m, "m.plt", p.nodes() * 2, p.step(),
+        p.origin(), p.accurancy());
+    VectorHandler::storeVector(w, "w.plt", p.nodes() * 2, p.step(),
+        p.origin(), p.accurancy());
 #   endif
 
     for(int i = 0; i < p.iters(); i++){
         N = (p.b() - p.d()) /
-            (vh.getDot(C, w, p.nodes(), p.step(), -p.R()) + p.s());
+            (vh.getDot(C, w, p.nodes(), p.step(), p.origin()) + p.s());
         getConvolutions(p);
 
 #       ifndef ASCETIC
@@ -36,13 +39,13 @@ Result Solver::solve(const Problem &p)
 
 #       ifdef DEBUG
         VectorHandler::storeVector(C, "C.plt", p.nodes() * 2,
-            p.step(), 0.0, p.accurancy());
+            p.step(), p.origin(), p.accurancy());
         VectorHandler::storeVector(wC, "wC.plt", p.nodes() * 2,
-            p.step(), 0.0, p.accurancy());
+            p.step(), p.origin(), p.accurancy());
         VectorHandler::storeVector(mC, "mC.plt", p.nodes() * 2,
-            p.step(), 0.0, p.accurancy());
+            p.step(), p.origin(), p.accurancy());
         VectorHandler::storeVector(CwC, "CwC.plt", p.nodes() * 2,
-            p.step(), 0.0, p.accurancy());
+            p.step(), p.origin(), p.accurancy());
 #       endif
 
         for(int j = 0; j < p.nodes(); j++){
@@ -72,22 +75,79 @@ Result Solver::solve(const Problem &p)
 
 
 
-void Solver::init(const Problem &p)
+void AbstractSolver::init(const Problem &p)
 {
-    int n = p.nodes();
+    getVectors(p);
+    initConvolving(p);
+}
+
+
+
+void AbstractSolver::clear()
+{
+    delete[] m;
+    delete[] w;
+    delete[] mC;
+    delete[] wC;
+    delete[] CwC;
+    delete[] w_mult_C;
+
+    clearConvolving();
+}
+
+
+
+void AbstractSolver::getVectors(const Problem &p)
+{
     vh = VectorHandler(p.dimension());
 
-    w = new double[n * 2];
-    m = new double[n * 2];
+    w = new double[p.nodes() * 2];
+    m = new double[p.nodes() * 2];
     if(C){
         delete[] C;
     }
-    C = new double[n * 2];
+    C = new double[p.nodes() * 2];
 
-    mC = new double[n * 2];
-    wC = new double[n * 2];
-    CwC = new double[n * 2];
-    w_mult_C = new double[n * 2];
+    mC = new double[p.nodes() * 2];
+    wC = new double[p.nodes() * 2];
+    CwC = new double[p.nodes() * 2];
+    w_mult_C = new double[p.nodes() * 2];
+
+    double x = p.origin();
+
+    for(int i = 0; i < p.nodes(); i++){
+        m[i] = p.getKernels().m(x);
+        w[i] = p.getKernels().w(x);
+        x += p.step();
+    }
+
+    double nm = vh.getIntNorm(m, p.nodes(), p.step(), p.origin());
+    double nw = vh.getIntNorm(w, p.nodes(), p.step(), p.origin());
+
+#   ifdef DEBUG
+    printf("nm = %15.5lf\nnw = %15.5lf\n", nm, nw);
+#   endif
+
+    for(int i = 0; i < p.nodes(); i++){
+        m[i] *= p.b() / nm;
+        C[i] = w[i] = w[i] * p.s() / nw;
+    }
+
+    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
+        m[i] = w[i] = w_mult_C[i] = C[i] = wC[i] = mC[i] = CwC[i] = 0.0;
+    }
+}
+
+
+
+
+
+/*=====================================================================*/
+/*                          SOLVER FFT METHODS                         */
+/*=====================================================================*/
+void SolverFFT::initConvolving(const Problem &p)
+{
+    int n = p.nodes();
 
     tmp_C = fftw_alloc_complex(n + 1);
     tmp_wC = fftw_alloc_complex(n + 1);
@@ -106,30 +166,12 @@ void Solver::init(const Problem &p)
     backward_CwC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, CwC,
         FFTW_ESTIMATE);
 
-    getVectors(p);
     getMWFFT(n);
 }
 
 
 
-void Solver::getVectors(const Problem &p)
-{
-    double x = -p.R();
-
-    for(int i = 0; i < p.nodes(); i++){
-        m[i] = p.b() * p.getKernels().m(x);
-        C[i] = w[i] = p.s() * p.getKernels().w(x);
-        x += p.step();
-    }
-
-    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
-        m[i] = w[i] = w_mult_C[i] = C[i] = wC[i] = mC[i] = CwC[i] = 0.0;
-    }
-}
-
-
-
-void Solver::getMWFFT(int n)
+void SolverFFT::getMWFFT(int n)
 {
     fftw_plan m_plan = fftw_plan_dft_r2c_1d(n * 2, m, fft_m,
         FFTW_ESTIMATE);
@@ -145,15 +187,8 @@ void Solver::getMWFFT(int n)
 
 
 
-void Solver::clear()
+void SolverFFT::clearConvolving()
 {
-    delete[] m;
-    delete[] w;
-    delete[] mC;
-    delete[] wC;
-    delete[] CwC;
-    delete[] w_mult_C;
-
     fftw_free(tmp_C);
     fftw_free(tmp_wC);
     fftw_free(tmp_back);
@@ -171,7 +206,7 @@ void Solver::clear()
 
 
 
-void Solver::getConvolutions(const Problem &p)
+void SolverFFT::getConvolutions(const Problem &p)
 {
     VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
 
@@ -198,7 +233,7 @@ void Solver::getConvolutions(const Problem &p)
 
 
 
-void Solver::convolve(const fftw_complex *f, const fftw_complex *g,
+void SolverFFT::convolve(const fftw_complex *f, const fftw_complex *g,
     const fftw_plan &plan, double *res, const Problem &p)
 {
     double re;
@@ -217,4 +252,84 @@ void Solver::convolve(const fftw_complex *f, const fftw_complex *g,
     for(int i = 0; i < p.nodes() * 2; i++){
         res[i] *= p.step() / (p.nodes() * 2);
     }
+}
+
+
+
+
+
+/*=====================================================================*/
+/*                         SOLVER DHT METHODS                          */
+/*=====================================================================*/
+void SolverDHT::initConvolving(const Problem &p)
+{
+    DHTMatrix = getHankelMatrix(p.nodes(), p.step());
+
+    Hm = new double[p.nodes()];
+    Hw = new double[p.nodes()];
+    HC = new double[p.nodes()];
+    Hw_mult_C = new double[p.nodes()];
+    tmp = new double[p.nodes()];
+
+    VectorHandler::multiplyMatVec(DHTMatrix, m, Hm, p.nodes());
+    VectorHandler::multiplyMatVec(DHTMatrix, w, Hw, p.nodes());
+}
+
+
+
+void SolverDHT::clearConvolving()
+{
+    delete[] DHTMatrix;
+    delete[] Hm;
+    delete[] Hw;
+    delete[] HC;
+    delete[] Hw_mult_C;
+    delete[] tmp;
+}
+
+
+
+void SolverDHT::getConvolutions(const Problem &p)
+{
+    VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
+
+    VectorHandler::multiplyMatVec(DHTMatrix, C, HC, p.nodes());
+    VectorHandler::multiplyMatVec(DHTMatrix, w_mult_C, Hw_mult_C,
+        p.nodes());
+
+    convolve(HC, Hm, mC, p.nodes());
+    convolve(HC, Hw, wC, p.nodes());
+    convolve(HC, Hw_mult_C, CwC, p.nodes());
+}
+
+
+
+void SolverDHT::convolve(double *Hf, double *Hg, double *fg, int n)
+{
+    for(int i = 0; i < n; i++){
+        tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
+    }
+
+    VectorHandler::multiplyMatVec(DHTMatrix, tmp, fg, n);
+}
+
+
+
+double *SolverDHT::getHankelMatrix(int n, double step)
+{
+    double x;
+    double y = 0.0;
+    double *res = new double[n * n];
+
+    for(int i = 0; i < n; i++){
+        x = 0.0;
+        for(int j = 0; j < n; j++){
+            res[i * n + j] = j0(x * y) * x *
+                VectorHandler::weight(j, n, step);
+            x += step;
+        }
+        y += step;
+    }
+
+    return res;
 }

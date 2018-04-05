@@ -62,7 +62,7 @@ void showArgs(const Problem &problem)
     printf(
         "R = %10.5lf\nn_count = %d\ni_count = %d\nb = %10.5lf\n"
         "s = %10.5lf\nd = %10.5lf\nalpha = %10.5lf\naccurancy = %d\n"
-        "step = %10.5lf\n",
+        "step = %10.5lf\ndimension = %d\n",
         problem.R(),
         problem.nodes(),
         problem.iters(),
@@ -71,7 +71,8 @@ void showArgs(const Problem &problem)
         problem.d(),
         problem.alpha(),
         problem.accurancy(),
-        problem.step()
+        problem.step(),
+        problem.dimension()
     );
     if(problem.path()){
         printf("path = '%s'\n", problem.path());
@@ -100,8 +101,13 @@ int main(int argc, char **argv)
     showArgs(equation);
 #   endif
 
-    Solver solver;
-    Result answer = solver.solve(equation);
+    AbstractSolver *solver;
+    if(equation.dimension() == 1){
+        solver = new SolverFFT();
+    }else{
+        solver = new SolverDHT();
+    }
+    Result answer = solver->solve(equation);
 
 #ifdef ASCETIC
     printf("%15.*lf %15.*lf\n", equation.accurancy(), answer.N(),
@@ -117,6 +123,8 @@ int main(int argc, char **argv)
             equation.nodes(), equation.step(), -equation.R(),
             equation.accurancy());
     }
+
+    delete solver;
 
     return 0;
 }

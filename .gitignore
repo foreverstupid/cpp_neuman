@@ -7,3 +7,5 @@ neuman
 *.sh
 *.gnu
 deps.mk
+rubbish
+tmp

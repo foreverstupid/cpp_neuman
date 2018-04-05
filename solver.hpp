@@ -24,7 +24,8 @@
 
 
 /* solves problem */
-class Solver{
+class AbstractSolver{
+protected:
 #   if defined(SHOUT) && !defined(ASCETIC)
     int bar_chars;          /* for progress bar */
 #   endif
@@ -40,8 +41,38 @@ class Solver{
     double *CwC;            /* samples of [Cw * C] */
     double *w_mult_C;       /* samples od wC */
 
+public:
+    AbstractSolver(){ C = 0; }
+    virtual ~AbstractSolver(){ if(C){ delete[] C; } }
+
+    /* solve current problem */
+    Result solve(const Problem &p);
+
+private:
+    /* init new solving process */
+    void init(const Problem &p);
+
+    /* inti data for convolving */
+    virtual void initConvolving(const Problem &p) = 0;
+
+    /* dispose resources after solving process finish */
+    void clear();
+
+    /* dispose data for convolving */
+    virtual void clearConvolving() = 0;
+
+    /* get zero padded samples of birth and death kernels and for C */
+    void getVectors(const Problem &p);
+
+    /* recompute needed convolutions */
+    virtual void getConvolutions(const Problem &p) = 0;
+};
+
+
+
+class SolverFFT : public AbstractSolver{
     fftw_complex *tmp_C;    /* variables for holding tmp results of */
-    fftw_complex *tmp_wC;   /* convolution */
+    fftw_complex *tmp_wC;   /* convolutions */
     fftw_complex *tmp_back;
 
     fftw_complex *fft_m;    /* fft of birth kernel */
@@ -53,32 +84,57 @@ class Solver{
     fftw_plan backward_wC;
     fftw_plan backward_CwC;
 
-public:
-    Solver(){ C = 0; }
-    ~Solver(){ if(C){ delete[] C; } }
 
-    /* solve current problem */
-    Result solve(const Problem &p);
-
-private:
-    /* init new solving process */
-    void init(const Problem &p);
-
-    /* dispose resources after solving process finish */
-    void clear();
-
-    /* get zero padded samples of birth and death kernels and for C */
-    void getVectors(const Problem &p);
+    void initConvolving(const Problem &p);
+    void clearConvolving();
+    void getConvolutions(const Problem &p);
 
     /* compute FFT of birth and death kernel */
     void getMWFFT(int n);
-
-    /* recompute needed convolutions */
-    void getConvolutions(const Problem &p);
 
     /* convolving function */
     void convolve(const fftw_complex *f, const fftw_complex *g,
         const fftw_plan &plan, double *res, const Problem &p);
 };
+
+
+
+class SolverDHT : public AbstractSolver{
+    double *DHTMatrix;      /* matrix for hankel transform */
+
+    double *Hm;             /* hankel transform of kernels */
+    double *Hw;
+
+    double *HC;             /* tmp variables for H[C] and H[wC] */
+    double *Hw_mult_C;
+
+    double *tmp;            /* help variable */
+
+
+    void initConvolving(const Problem &p);
+    void clearConvolving();
+    void getConvolutions(const Problem &p);
+
+    /* get matrix of DHT */
+    static double *getHankelMatrix(int n, double step);
+
+    /* make convolving vector hankel originals */
+    void convolve(double *Hf, double *Hg, double *fg, int n);
+};
+/*
+
+
+class Solver1D : public SolverFFT{
+};
+
+
+
+class Solver2D : public SolverDHT{
+};
+
+
+
+class Solver3D : public SolverFFT{
+};*/
 
 #endif

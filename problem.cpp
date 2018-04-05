@@ -36,7 +36,7 @@ int Problem::init(int argc, char **argv)
             return expected_arg_error;
         }
 
-        if(argv[i][1] != 'h' && !argv[i + 1]){
+        if(argv[i][1] != 'h' && !isDigit(argv[i][1]) && !argv[i + 1]){
             fprintf(stderr, "### Empty value after '%s'\n", argv[i]);
             return empty_arg_error;
         }
@@ -47,6 +47,11 @@ int Problem::init(int argc, char **argv)
     }
 
     _step = 2 * _R / (n_count - 1);
+    if(dim > 1){
+        orgn = 0.0;
+    }else{
+        orgn = 0.0;     /* TODO: -_R */
+    }
     return success;
 }
 
@@ -101,6 +106,8 @@ int Problem::handleArgument(int *i, char **argv)
                     fprintf(stderr, "### Wrong dimension\n");
                     return dim_error;
                 }
+
+                *i -= 1;
             }else{
                 fprintf(stderr, "### Unknown argument '%s'\n",
                     argv[*i]);

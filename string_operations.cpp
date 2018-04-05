@@ -2,9 +2,14 @@
 
 bool isNumber(const char *str)
 {
+    int i = 0;
     bool wasPoint = false;
 
-    for(int i = 0; str[i]; i++){
+    if(str[0] == '-'){
+        i = 1;
+    }
+
+    for(; str[i]; i++){
         if(str[i] == '.'){
             if(!wasPoint){
                 wasPoint = true;
@@ -27,24 +32,32 @@ bool isNumber(const char *str)
 int str2int(const char *str)
 {
     int res = 0;
+    int i = 0;
+    int sign = 1;
 
     if(!str){
         return 0;
     }
 
-    for(int i = 0; str[i]; i++){
+    if(str[0] == '-'){
+        sign = -1;
+        i = 1;
+    }
+
+    for(; str[i]; i++){
         res *= 10;
         res += str[i] - '0';
     }
 
-    return res;
+    return res * sign;
 }
 
 
 
 double str2double(const char *str)
 {
-    int i;
+    int i = 0;
+    int sign = 1;
     double res = 0.0;
     double hlp = 0.1;
 
@@ -52,7 +65,12 @@ double str2double(const char *str)
         return 0.0;
     }
 
-    for(i = 0; str[i] && str[i] != '.'; i++){
+    if(str[0] == '-'){
+        sign = -1;
+        i = 1;
+    }
+
+    for(; str[i] && str[i] != '.'; i++){
         res *= 10;
         res += str[i] - '0';
     }
@@ -64,6 +82,5 @@ double str2double(const char *str)
         }
     }
 
-    return res;
-
+    return res * sign;
 }

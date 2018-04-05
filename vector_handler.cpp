@@ -16,17 +16,18 @@ double VectorHandler::getDot(const double *f, const double *g, int size,
 
 
 
-double VectorHandler::getIntNorm(const double *f, int size, double origin,
-    double step)
+double VectorHandler::getIntNorm(const double *f, int size, double step,
+    double origin)
 {
-    int res = 0.0;
-    int x = origin;
+    double res = 0.0;
+    double x = origin;
 
     for(int i = 0; i < size; i++){
         res += f[i] * weight(i, size, step) * jacobian(x);
+        x += step;
     }
 
-    return res;
+    return res * dimCoeff();
 }
 
 
@@ -38,6 +39,22 @@ void VectorHandler::multiplyVecs(const double *f, const double *g,
         fg[i] = f[i] * g[i];
     }
 }
+
+
+
+void VectorHandler::multiplyMatVec(double *A, double *x, double *b, int n)
+{
+    double res;
+
+    for(int i = 0; i < n; i++){
+        res = 0.0;
+        for(int j = 0; j < n; j++){
+            res += A[i * n + j] * x[j];
+        }
+        b[i] = res;
+    }
+}
+
 
 
 void VectorHandler::storeVector(const double *f, const char *path,
