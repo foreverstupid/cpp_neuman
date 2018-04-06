@@ -321,14 +321,18 @@ double *SolverDHT::getHankelMatrix(int n, double step)
     double y = 0.0;
     double *res = new double[n * n];
 
-    for(int i = 0; i < n; i++){
+    for(int i = 1; i < n; i++){
         x = 0.0;
-        for(int j = 0; j < n; j++){
-            res[i * n + j] = j0(x * y) * x *
+        for(int j = i; j < n; j++){
+            res[i * n + j] = res[j * n + i] = j0(x * y) * x *
                 VectorHandler::weight(j, n, step);
             x += step;
         }
         y += step;
+    }
+
+    for(int i = 0; i < n; i++){
+        res[i] = res[i * n] = 1.0;
     }
 
     return res;

@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall -O3 -fno-exceptions -DSHOUT
+CFLAGS=-Wall -O2 -g -fno-exceptions -DSHOUT
 LIBS=-lm -lfftw3
 LDFLAGS=
 

@@ -19,7 +19,7 @@ Problem::Problem()
     dim = 1;
 
     _path = default_path;
-    acc = 3;
+    acc = 5;
 }
 
 
@@ -50,7 +50,7 @@ int Problem::init(int argc, char **argv)
     if(dim > 1){
         orgn = 0.0;
     }else{
-        orgn = 0.0;     /* TODO: -_R */
+        orgn = -_R;     /* TODO: -_R */
     }
     return success;
 }
