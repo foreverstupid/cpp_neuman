@@ -1,9 +1,9 @@
 # Equilibrium problem solution in 1D
 
-This project was made for the equilibrium problem solution that appears in
+This project was made for solving the equilibrium problem with second 
+order parametrized closure that appears in
 the Ulf Dieckmann's model of ecological systems. Neuman's method is used for
-solving this problem. Second order parametrized closure is used in this
-programm.
+solving this problem.
 
 ## Compiling:
 
@@ -39,12 +39,17 @@ programm.
 
     -n - set node count (positive integer). Default: 5000.
 
-    -r - set integration segment [-r; r] (real). Default: 20.0.
+    -r - set integration segment [0; r] (real). Default: 20.0.
+
+    -D - set dimension of space (1, 2 or 3). Default: 1.
 
     -p - set path to store calculated data (string). Default: graph.plt.
         Note: if you want program to not create a file write "-p n".
 
-    -a - set parameter of closure (real). Default: 0.0.
+    -e - set accurancy of all output info in count of digits after point
+        (positive integer or zero). Default: 5.
+
+    -a - set parameter of closure (real from [0; 1]). Default: 0.0.
 
     -d - set environment death coeff (real). Default: 0.0.
 
@@ -65,12 +70,15 @@ programm.
     sigma for birth).
 
     k - kurtic kernels. Parameters: two real numbers (first difines
-    s_1^m and s_1^w, second - s_2^m and s_2^w).
+    s_1m and s_1w, second - s_2m and s_2w).
 
     e - Danchenko's exponential kerenels. Parameters: two real numbers
     (A and B parameters).
 
     Default kernels are kurtic.
+
+    If you write the same cmd argument twice or more times, programm will
+    be used the last one.
 
 ## Example of using:
 
@@ -80,13 +88,13 @@ programm.
 
     Program save calculated second moment in the file defined by the
     argument of -p in format 'x y'. Moreover it prints the first moment
-    value to the standart output. If flag -DASCETIC is on, programm prints
-    both the first moment value or the second moment value of zero (see
-    compilation flags)
+    value and the second moment of zero into the standart output.
 
 ## Dependencies:
 
-    Programm uses "fftw-3.3.7" library for convolving functions
+    Programm uses "fftw-3.3.7" library for FFT function convolving.
+    Programm uses CUDA 9.1 for DHT function convolving, that is used in
+    2D case.
 
 **Author isn't responsible for mental health that can be damaged during
 reading this code**
