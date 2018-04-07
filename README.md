@@ -1,4 +1,4 @@
-# Equilibrium problem solution in 1D
+# Equilibrium problem solution in 1D, 2D and 3D
 
 This project was made for solving the equilibrium problem with second 
 order parametrized closure that appears in
@@ -92,9 +92,8 @@ solving this problem.
 
 ## Dependencies:
 
-    Programm uses "fftw-3.3.7" library for FFT function convolving.
-    Programm uses CUDA 9.1 for DHT function convolving, that is used in
-    2D case.
+    Programm uses CUDA 9.1 for DHT function convolving in 2D case and for
+    FFT convolving in 1D and 3D case (cufft).
 
 **Author isn't responsible for mental health that can be damaged during
 reading this code**
