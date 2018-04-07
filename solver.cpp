@@ -271,8 +271,15 @@ void SolverDHT::initConvolving(const Problem &p)
     Hw_mult_C = new double[p.nodes()];
     tmp = new double[p.nodes()];
 
-    VectorHandler::multiplyMatVec(DHTMatrix, m, Hm, p.nodes());
-    VectorHandler::multiplyMatVec(DHTMatrix, w, Hw, p.nodes());
+    cudaMalloc((void **)&kM, sizeof(double) * p.nodes() * p.nodes());
+    cudaMalloc((void **)&kx, sizeof(double) * p.nodes());
+    cudaMalloc((void **)&kb, sizeof(double) * p.nodes());
+
+    cudaMemcpy(kM, DHTMatrix, sizeof(double) * p.nodes() * p.nodes(),
+        cudaMemcpyHostToDevice);
+
+    getDHT(m, Hm, p.nodes());
+    getDHT(w, Hw, p.nodes());
 }
 
 
@@ -285,6 +292,17 @@ void SolverDHT::clearConvolving()
     delete[] HC;
     delete[] Hw_mult_C;
     delete[] tmp;
+
+    cudaFree(kM);
+    cudaFree(kx);
+    cudaFree(kb);
+}
+
+
+
+void SolverDHT::getDHT(double *f, double *Hf, int n)
+{
+    getMatMulVec(kM, kx, kb, f, Hf, n);
 }
 
 
@@ -293,9 +311,8 @@ void SolverDHT::getConvolutions(const Problem &p)
 {
     VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
 
-    VectorHandler::multiplyMatVec(DHTMatrix, C, HC, p.nodes());
-    VectorHandler::multiplyMatVec(DHTMatrix, w_mult_C, Hw_mult_C,
-        p.nodes());
+    getDHT(C, HC, p.nodes());
+    getDHT(w_mult_C, Hw_mult_C, p.nodes());
 
     convolve(HC, Hm, mC, p.nodes());
     convolve(HC, Hw, wC, p.nodes());
@@ -310,7 +327,7 @@ void SolverDHT::convolve(double *Hf, double *Hg, double *fg, int n)
         tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
     }
 
-    VectorHandler::multiplyMatVec(DHTMatrix, tmp, fg, n);
+    getDHT(tmp, fg, n);
 }
 
 
@@ -319,6 +336,7 @@ double *SolverDHT::getHankelMatrix(int n, double step)
 {
     double x;
     double y = 0.0;
+    /* TODO: I have no such a huge memory */
     double *res = new double[n * n];
 
     for(int i = 1; i < n; i++){

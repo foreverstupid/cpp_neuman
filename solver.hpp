@@ -5,6 +5,7 @@
 #include <fftw3.h>
 #include "problem.hpp"
 #include "vector_handler.hpp"
+#include "cuda_vec.hpp"
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -109,6 +110,9 @@ class SolverDHT : public AbstractSolver{
     double *Hw_mult_C;
 
     double *tmp;            /* help variable */
+    double *kM;
+    double *kx;
+    double *kb;
 
 
     void initConvolving(const Problem &p);
@@ -117,6 +121,9 @@ class SolverDHT : public AbstractSolver{
 
     /* get matrix of DHT */
     static double *getHankelMatrix(int n, double step);
+
+    /* get hankel transform of vector */
+    void getDHT(double *f, double *Hf, int n);
 
     /* make convolving vector hankel originals */
     void convolve(double *Hf, double *Hg, double *fg, int n);

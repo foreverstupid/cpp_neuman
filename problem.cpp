@@ -50,7 +50,7 @@ int Problem::init(int argc, char **argv)
     if(dim > 1){
         orgn = 0.0;
     }else{
-        orgn = -_R;     /* TODO: -_R */
+        orgn = 0.0;     /* TODO: -_R */
     }
     return success;
 }
