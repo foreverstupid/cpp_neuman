@@ -20,7 +20,7 @@ void cudaMatMulVec(double *kM, double *kx, double *kb, double *f,
     double *Hf, int n)
 {
     cudaMemcpy(kx, f, sizeof(double) * n, cudaMemcpyHostToDevice);
-    mult_kernel<<<n / 256 + 1, n>>>(kM, kx, kb, n);
+    mult_kernel<<<grid_size, blck_size>>>(kM, kx, kb, n);
     cudaMemcpy(Hf, kb, sizeof(double) * n, cudaMemcpyDeviceToHost);
 }
 
@@ -49,6 +49,6 @@ void cudaHankel(double *kx, double *kb, double *f, double *Hf,
     double step, int n)
 {
     cudaMemcpy(kx, f, sizeof(double) * n, cudaMemcpyHostToDevice);
-    hank_kernel<<<n / 256 + 1, n>>>(kx, kb, step, n);
+    hank_kernel<<<grid_size, blck_size>>>(kx, kb, step, n);
     cudaMemcpy(Hf, kb, sizeof(double) * n, cudaMemcpyDeviceToHost);
 }

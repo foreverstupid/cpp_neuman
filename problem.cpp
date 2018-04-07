@@ -46,12 +46,9 @@ int Problem::init(int argc, char **argv)
         }
     }
 
-    _step = 2 * _R / (n_count - 1);
-    if(dim > 1){
-        orgn = 0.0;
-    }else{
-        orgn = 0.0;     /* TODO: -_R */
-    }
+    _step = _R / (n_count - 1);
+    orgn = 0.0;
+
     return success;
 }
 
@@ -70,6 +67,13 @@ int Problem::handleArgument(int *i, char **argv)
             break;
         case 'r':
             _R = str2double(argv[*i + 1]);
+            break;
+        case 'D':
+            dim = str2int(argv[*i + 1]);
+            if(dim > 3 || dim < 1){
+                fprintf(stderr, "### Wrong dimension\n");
+                return dim_error;
+            }
             break;
         case 'p':
             _path = argv[*i + 1];
@@ -100,19 +104,8 @@ int Problem::handleArgument(int *i, char **argv)
         case 'h':
             return help;
         default:
-            if(isDigit(argv[*i][1])){
-                dim = argv[*i][1] - '0';
-                if(dim > 3 || dim < 1){
-                    fprintf(stderr, "### Wrong dimension\n");
-                    return dim_error;
-                }
-
-                *i -= 1;
-            }else{
-                fprintf(stderr, "### Unknown argument '%s'\n",
-                    argv[*i]);
-                return unknown_arg_error;
-            }
+            fprintf(stderr, "### Unknown argument '%s'\n", argv[*i]);
+            return unknown_arg_error;
     }
 
     *i += 2;

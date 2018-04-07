@@ -6,6 +6,11 @@
 #include <cuda_runtime_api.h>
 #include <math.h>
 
+enum{
+    grid_size = 256,
+    blck_size = 256
+};
+
 void cudaMatMulVec(double *kM, double *kx, double *kb, double *f,
     double *Hf, int n);
 

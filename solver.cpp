@@ -166,23 +166,52 @@ void SolverFFT::initConvolving(const Problem &p)
     backward_CwC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, CwC,
         FFTW_ESTIMATE);
 
-    getMWFFT(n);
+    getMWFFT(p);
 }
 
 
 
-void SolverFFT::getMWFFT(int n)
+void SolverFFT::getMWFFT(const Problem &p)
 {
-    fftw_plan m_plan = fftw_plan_dft_r2c_1d(n * 2, m, fft_m,
-        FFTW_ESTIMATE);
-    fftw_plan w_plan = fftw_plan_dft_r2c_1d(n * 2, w, fft_w,
-        FFTW_ESTIMATE);
+    /* hold x * m(x) and x * w(x) in 3D case */
+    double *tmp_m;
+    double *tmp_w;
+
+    fftw_plan m_plan;
+    fftw_plan w_plan;
+
+    if(p.dimension() == 3){
+        tmp_m = new double[2 * p.nodes()];
+        tmp_w = new double[2 * p.nodes()];
+        double x = p.origin();
+
+        for(int i = 0; i < 2 * p.nodes(); i++){
+            tmp_m[i] = 4 * M_PI * x * m[i];
+            tmp_w[i] = 4 * M_PI * x * w[i];
+            x += p.step();
+        }
+
+        m_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, tmp_m, fft_m,
+            FFTW_ESTIMATE);
+        w_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, tmp_w, fft_w,
+            FFTW_ESTIMATE);
+    }else{
+        m_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, m, fft_m,
+            FFTW_ESTIMATE);
+        w_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, w, fft_w,
+            FFTW_ESTIMATE);
+    }
 
     fftw_execute(m_plan);
     fftw_execute(w_plan);
 
     fftw_destroy_plan(m_plan);
     fftw_destroy_plan(w_plan);
+
+    if(p.dimension() == 3){
+        delete[] tmp_m;
+        delete[] tmp_w;
+    }
 }
 
 
@@ -209,6 +238,15 @@ void SolverFFT::clearConvolving()
 void SolverFFT::getConvolutions(const Problem &p)
 {
     VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
+
+    if(p.dimension() == 3){
+        double x = p.origin();
+
+        for(int i = 0; i < p.nodes(); i++){
+            w_mult_C[i] *= 4 * M_PI * x;
+            x += p.step();
+        }
+    }
 
     for(int i = p.nodes(); i < 2 * p.nodes(); i++){
         w_mult_C[i] = C[i] = 0;

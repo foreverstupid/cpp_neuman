@@ -19,9 +19,10 @@
 "-b    - kind birth parameter\n" \
 "-s    - kind death parameter\n" \
 "-r    - size of area\n" \
+"-D    - dimension of space\n"\
 "-i    - iteration count\n" \
-"-p    - path to store data (give 'n' to not create a data file)\n" \
 "-n    - grid node count\n" \
+"-p    - path to store data (give 'n' to not create a data file)\n" \
 "-e    - accurancy in signs after point\n" \
 "-h    - show this help\n"
 
@@ -102,25 +103,25 @@ int main(int argc, char **argv)
 #   endif
 
     AbstractSolver *solver;
-    if(equation.dimension() == 1){
+    if(equation.dimension() == 1 || equation.dimension() == 3){
         solver = new SolverFFT();
     }else{
         solver = new SolverDHT();
     }
     Result answer = solver->solve(equation);
 
-#ifdef ASCETIC
+#   ifdef ASCETIC
     printf("%15.*lf %15.*lf\n", equation.accurancy(), answer.N(),
-    equation.accurancy(), answer.getC0());
-#else
+        equation.accurancy(), answer.getC0());
+#   else
     printf("First moment: %.*lf\nC(0) = %.*lf\n",
         equation.accurancy(), answer.N(), equation.accurancy(),
         answer.getC0());
-#endif
+#   endif
 
     if(equation.path()){
         VectorHandler::storeVector(answer.C(), equation.path(),
-            equation.nodes(), equation.step(), -equation.R(),
+            equation.nodes(), equation.step(), equation.origin(),
             equation.accurancy());
     }
 

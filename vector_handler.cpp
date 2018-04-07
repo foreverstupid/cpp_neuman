@@ -11,7 +11,7 @@ double VectorHandler::getDot(const double *f, const double *g, int size,
         x += step;
     }
 
-    return res;
+    return res * dimCoeff;
 }
 
 
@@ -27,7 +27,7 @@ double VectorHandler::getIntNorm(const double *f, int size, double step,
         x += step;
     }
 
-    return res * dimCoeff();
+    return res * dimCoeff;
 }
 
 

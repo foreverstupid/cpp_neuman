@@ -7,6 +7,7 @@
 
 class VectorHandler{
     int dim;
+    double dimCoeff;
 
 public:
     /* multiply two vectors componentwise and save result in the third
@@ -29,8 +30,11 @@ public:
         return i == 0 || i == n - 1 ? step / 2 : step;
     }
 
-    VectorHandler() : dim(1) {}
-    VectorHandler(int dim) : dim(dim) {}
+    VectorHandler() : dim(1) { dimCoeff = 2.0; }
+    VectorHandler(int dim) : dim(dim)
+    {
+        dimCoeff = dim == 1 ? 2.0 : dim == 2 ? 2.0 * M_PI : 4.0 * M_PI;
+    }
 
     const int getDimension() const { return dim; }
 
@@ -48,16 +52,8 @@ private:
     {
         return
             dim == 1 ? 1.0 :
-            dim == 2 ? 2 * M_PI * x :
-            4 * M_PI * x * x;
-    }
-
-    double dimCoeff()
-    {
-        return
-            dim == 1 ? 2.0 :
-            dim == 2 ? 2 * M_PI :
-            4 * M_PI;
+            dim == 2 ? x :
+                       x * x;
     }
 };
 

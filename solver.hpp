@@ -91,7 +91,7 @@ class SolverFFT : public AbstractSolver{
     void getConvolutions(const Problem &p);
 
     /* compute FFT of birth and death kernel */
-    void getMWFFT(int n);
+    void getMWFFT(const Problem &p);
 
     /* convolving function */
     void convolve(const fftw_complex *f, const fftw_complex *g,
@@ -122,20 +122,5 @@ class SolverDHT : public AbstractSolver{
     /* make convolving vector hankel originals */
     void convolve(double *Hf, double *Hg, double *fg, double step, int n);
 };
-/*
-
-
-class Solver1D : public SolverFFT{
-};
-
-
-
-class Solver2D : public SolverDHT{
-};
-
-
-
-class Solver3D : public SolverFFT{
-};*/
 
 #endif
