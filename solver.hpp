@@ -101,16 +101,13 @@ class SolverFFT : public AbstractSolver{
 
 
 class SolverDHT : public AbstractSolver{
-    double *DHTMatrix;      /* matrix for hankel transform */
-
     double *Hm;             /* hankel transform of kernels */
     double *Hw;
 
     double *HC;             /* tmp variables for H[C] and H[wC] */
     double *Hw_mult_C;
 
-    double *tmp;            /* help variable */
-    double *kM;
+    double *tmp;            /* help variables */
     double *kx;
     double *kb;
 
@@ -119,14 +116,11 @@ class SolverDHT : public AbstractSolver{
     void clearConvolving();
     void getConvolutions(const Problem &p);
 
-    /* get matrix of DHT */
-    static double *getHankelMatrix(int n, double step);
-
     /* get hankel transform of vector */
-    void getDHT(double *f, double *Hf, int n);
+    void getDHT(double *f, double *Hf, double step, int n);
 
     /* make convolving vector hankel originals */
-    void convolve(double *Hf, double *Hg, double *fg, int n);
+    void convolve(double *Hf, double *Hg, double *fg, double step, int n);
 };
 /*
 

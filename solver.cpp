@@ -263,46 +263,38 @@ void SolverFFT::convolve(const fftw_complex *f, const fftw_complex *g,
 /*=====================================================================*/
 void SolverDHT::initConvolving(const Problem &p)
 {
-    DHTMatrix = getHankelMatrix(p.nodes(), p.step());
-
     Hm = new double[p.nodes()];
     Hw = new double[p.nodes()];
     HC = new double[p.nodes()];
     Hw_mult_C = new double[p.nodes()];
     tmp = new double[p.nodes()];
 
-    cudaMalloc((void **)&kM, sizeof(double) * p.nodes() * p.nodes());
     cudaMalloc((void **)&kx, sizeof(double) * p.nodes());
     cudaMalloc((void **)&kb, sizeof(double) * p.nodes());
 
-    cudaMemcpy(kM, DHTMatrix, sizeof(double) * p.nodes() * p.nodes(),
-        cudaMemcpyHostToDevice);
-
-    getDHT(m, Hm, p.nodes());
-    getDHT(w, Hw, p.nodes());
+    getDHT(m, Hm, p.step(), p.nodes());
+    getDHT(w, Hw, p.step(), p.nodes());
 }
 
 
 
 void SolverDHT::clearConvolving()
 {
-    delete[] DHTMatrix;
     delete[] Hm;
     delete[] Hw;
     delete[] HC;
     delete[] Hw_mult_C;
     delete[] tmp;
 
-    cudaFree(kM);
     cudaFree(kx);
     cudaFree(kb);
 }
 
 
 
-void SolverDHT::getDHT(double *f, double *Hf, int n)
+void SolverDHT::getDHT(double *f, double *Hf, double step, int n)
 {
-    getMatMulVec(kM, kx, kb, f, Hf, n);
+    cudaHankel(kx, kb, f, Hf, step, n);
 }
 
 
@@ -311,47 +303,22 @@ void SolverDHT::getConvolutions(const Problem &p)
 {
     VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
 
-    getDHT(C, HC, p.nodes());
-    getDHT(w_mult_C, Hw_mult_C, p.nodes());
+    getDHT(C, HC, p.step(), p.nodes());
+    getDHT(w_mult_C, Hw_mult_C, p.step(), p.nodes());
 
-    convolve(HC, Hm, mC, p.nodes());
-    convolve(HC, Hw, wC, p.nodes());
-    convolve(HC, Hw_mult_C, CwC, p.nodes());
+    convolve(HC, Hm, mC, p.step(), p.nodes());
+    convolve(HC, Hw, wC, p.step(), p.nodes());
+    convolve(HC, Hw_mult_C, CwC, p.step(), p.nodes());
 }
 
 
 
-void SolverDHT::convolve(double *Hf, double *Hg, double *fg, int n)
+void SolverDHT::convolve(double *Hf, double *Hg, double *fg, double step,
+    int n)
 {
     for(int i = 0; i < n; i++){
         tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
     }
 
-    getDHT(tmp, fg, n);
-}
-
-
-
-double *SolverDHT::getHankelMatrix(int n, double step)
-{
-    double x;
-    double y = 0.0;
-    /* TODO: I have no such a huge memory */
-    double *res = new double[n * n];
-
-    for(int i = 1; i < n; i++){
-        x = 0.0;
-        for(int j = i; j < n; j++){
-            res[i * n + j] = res[j * n + i] = j0(x * y) * x *
-                VectorHandler::weight(j, n, step);
-            x += step;
-        }
-        y += step;
-    }
-
-    for(int i = 0; i < n; i++){
-        res[i] = res[i * n] = 1.0;
-    }
-
-    return res;
+    getDHT(tmp, fg, step, n);
 }
