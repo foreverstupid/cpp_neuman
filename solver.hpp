@@ -2,10 +2,10 @@
 #define SOLVER_CLASS_HPP
 
 #include <math.h>
-#include <fftw3.h>
+#include <cufft.h>
 #include "problem.hpp"
 #include "vector_handler.hpp"
-#include "cuda_vec.hpp"
+#include "cuda_operations.hpp"
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -72,18 +72,19 @@ private:
 
 
 class SolverFFT : public AbstractSolver{
-    fftw_complex *tmp_C;    /* variables for holding tmp results of */
-    fftw_complex *tmp_wC;   /* convolutions */
-    fftw_complex *tmp_back;
+    cufftDoubleComplex *tmp_C;        /* variables for holding tmp */
+    cufftDoubleComplex *tmp_wC;       /* results of convolving */
+    cufftDoubleComplex *tmp_back;
+    double *cuda_tmp;
 
-    fftw_complex *fft_m;    /* fft of birth kernel */
-    fftw_complex *fft_w;    /* fft of death kernel */
+    cufftDoubleComplex *fft_m;        /* fft of birth kernel */
+    cufftDoubleComplex *fft_w;        /* fft of death kernel */
 
-    fftw_plan forward_C;    /* plans for fftw3 */
-    fftw_plan forward_wC;
-    fftw_plan backward_mC;
-    fftw_plan backward_wC;
-    fftw_plan backward_CwC;
+    cufftHandle forward_C;            /* plans for cufft */
+    cufftHandle forward_wC;
+    cufftHandle backward_mC;
+    cufftHandle backward_wC;
+    cufftHandle backward_CwC;
 
 
     void initConvolving(const Problem &p);
@@ -94,8 +95,9 @@ class SolverFFT : public AbstractSolver{
     void getMWFFT(const Problem &p);
 
     /* convolving function */
-    void convolve(const fftw_complex *f, const fftw_complex *g,
-        const fftw_plan &plan, double *res, const Problem &p);
+    void convolve(const cufftDoubleComplex *f,
+        const cufftDoubleComplex *g, const cufftHandle &plan, double *res,
+        const Problem &p);
 };
 
 

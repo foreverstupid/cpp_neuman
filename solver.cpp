@@ -149,22 +149,18 @@ void SolverFFT::initConvolving(const Problem &p)
 {
     int n = p.nodes();
 
-    tmp_C = fftw_alloc_complex(n + 1);
-    tmp_wC = fftw_alloc_complex(n + 1);
-    tmp_back = fftw_alloc_complex(n + 1);
-    fft_m = fftw_alloc_complex(n + 1);
-    fft_w = fftw_alloc_complex(n + 1);
+    cudaMalloc((void **)&tmp_C, sizeof(cufftDoubleComplex) * (n + 1));
+    cudaMalloc((void **)&tmp_wC, sizeof(cufftDoubleComplex) * (n + 1));
+    cudaMalloc((void **)&tmp_back, sizeof(cufftDoubleComplex) * (n + 1));
+    cudaMalloc((void **)&fft_m, sizeof(cufftDoubleComplex) * (n + 1));
+    cudaMalloc((void **)&fft_w, sizeof(cufftDoubleComplex) * (n + 1));
+    cudaMalloc((void **)&cuda_tmp, sizeof(double) * 2 * n);
 
-    forward_C = fftw_plan_dft_r2c_1d(n * 2, C, tmp_C,
-        FFTW_ESTIMATE);
-    forward_wC = fftw_plan_dft_r2c_1d(n * 2, w_mult_C, tmp_wC,
-        FFTW_ESTIMATE);
-    backward_mC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, mC,
-        FFTW_ESTIMATE);
-    backward_wC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, wC,
-        FFTW_ESTIMATE);
-    backward_CwC = fftw_plan_dft_c2r_1d(n * 2, tmp_back, CwC,
-        FFTW_ESTIMATE);
+    cufftPlan1d(&forward_C, 2 * n, CUFFT_R2C, 1);
+    cufftPlan1d(&forward_wC, 2 * n, CUFFT_R2C, 1);
+    cufftPlan1d(&backward_mC, 2 * n, CUFFT_C2R, 1);
+    cufftPlan1d(&backward_wC, 2 * n, CUFFT_C2R, 1);
+    cufftPlan1d(&backward_CwC, 2 * n, CUFFT_C2R, 1);
 
     getMWFFT(p);
 }
@@ -174,11 +170,9 @@ void SolverFFT::initConvolving(const Problem &p)
 void SolverFFT::getMWFFT(const Problem &p)
 {
     /* hold x * m(x) and x * w(x) in 3D case */
-    double *tmp_m;
-    double *tmp_w;
-
-    fftw_plan m_plan;
-    fftw_plan w_plan;
+    double *tmp_m = m;
+    double *tmp_w = w;
+    cufftHandle plan;
 
     if(p.dimension() == 3){
         tmp_m = new double[2 * p.nodes()];
@@ -190,47 +184,36 @@ void SolverFFT::getMWFFT(const Problem &p)
             tmp_w[i] = 4 * M_PI * x * w[i];
             x += p.step();
         }
-
-        m_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, tmp_m, fft_m,
-            FFTW_ESTIMATE);
-        w_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, tmp_w, fft_w,
-            FFTW_ESTIMATE);
-    }else{
-        m_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, m, fft_m,
-            FFTW_ESTIMATE);
-        w_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, w, fft_w,
-            FFTW_ESTIMATE);
     }
 
-    fftw_execute(m_plan);
-    fftw_execute(w_plan);
-
-    fftw_destroy_plan(m_plan);
-    fftw_destroy_plan(w_plan);
+    cufftPlan1d(&plan, 2 * p.nodes(), CUFFT_R2C, 1);
+    cudaFFTForward(plan, tmp_m, cuda_tmp, fft_m, p.nodes() * 2);
+    cudaFFTForward(plan, tmp_w, cuda_tmp, fft_w, p.nodes() * 2);
 
     if(p.dimension() == 3){
         delete[] tmp_m;
         delete[] tmp_w;
     }
+
+    cufftDestroy(plan);
 }
 
 
 
 void SolverFFT::clearConvolving()
 {
-    fftw_free(tmp_C);
-    fftw_free(tmp_wC);
-    fftw_free(tmp_back);
-    fftw_free(fft_m);
-    fftw_free(fft_w);
+    cudaFree(tmp_C);
+    cudaFree(tmp_wC);
+    cudaFree(tmp_back);
+    cudaFree(fft_m);
+    cudaFree(fft_w);
+    cudaFree(cuda_tmp);
 
-    fftw_destroy_plan(forward_C);
-    fftw_destroy_plan(forward_wC);
-    fftw_destroy_plan(backward_mC);
-    fftw_destroy_plan(backward_wC);
-    fftw_destroy_plan(backward_CwC);
-
-    fftw_cleanup();
+    cufftDestroy(forward_C);
+    cufftDestroy(forward_wC);
+    cufftDestroy(backward_mC);
+    cufftDestroy(backward_wC);
+    cufftDestroy(backward_CwC);
 }
 
 
@@ -257,8 +240,8 @@ void SolverFFT::getConvolutions(const Problem &p)
         p.step(), -p.R(), p.accurancy());
 #   endif
 
-    fftw_execute(forward_C);
-    fftw_execute(forward_wC);
+    cudaFFTForward(forward_C, C, cuda_tmp, tmp_C, 2 * p.nodes());
+    cudaFFTForward(forward_wC, C, cuda_tmp, tmp_C, 2 * p.nodes());
 
     convolve(tmp_C, fft_m, backward_mC, mC, p);
     convolve(tmp_C, fft_w, backward_wC, wC, p);
@@ -271,21 +254,12 @@ void SolverFFT::getConvolutions(const Problem &p)
 
 
 
-void SolverFFT::convolve(const fftw_complex *f, const fftw_complex *g,
-    const fftw_plan &plan, double *res, const Problem &p)
+void SolverFFT::convolve(const cufftDoubleComplex *f,
+    const cufftDoubleComplex *g, const cufftHandle &plan, double *res,
+    const Problem &p)
 {
-    double re;
-    double im;
-
-    for(int i = 0; i < p.nodes() + 1; i++){
-        re = f[i][0] * g[i][0] - f[i][1] * g[i][1];
-        im = f[i][0] * g[i][1] + f[i][1] * g[i][0];
-
-        tmp_back[i][0] = re;
-        tmp_back[i][1] = im;
-    }
-
-    fftw_execute(plan);
+    cudaMultiplyComplexVecs(f, g, tmp_back, p.nodes() + 1);
+    cudaFFTBackward(plan, tmp_back, cuda_tmp, res, 2 * p.nodes());
 
     for(int i = 0; i < p.nodes() * 2; i++){
         res[i] *= p.step() / (p.nodes() * 2);

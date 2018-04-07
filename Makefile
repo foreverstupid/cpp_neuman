@@ -1,7 +1,7 @@
 CC=g++
 CUDACC=nvcc
 CFLAGS=-Wall -g -fno-exceptions -DSHOUT
-LIBS=-lm -lfftw3 -lcuda -lcudart
+LIBS=-lm -lfftw3 -lcuda -lcudart -lcufft
 LDFLAGS=-L/usr/local/cuda/lib64
 INCDIR= -I/usr/local/cuda-9.1/include/
 
@@ -13,10 +13,10 @@ NAME=neuman
 %.o: %.cpp %.hpp
 	$(CC) $(CFLAGS) $(INCDIR) -c $< -o $@
 
-$(NAME): main.cpp $(OBJ) cuda_vec.o
+$(NAME): main.cpp $(OBJ) cuda_operations.o
 	$(CC) $(CFLAGS) $(INCDIR) $(LDFLAGS) $^ $(LIBS) -o $@
 
-cuda_vec.o: cuda_vec.cu cuda_vec.hpp
+cuda_operations.o: cuda_operations.cu cuda_operations.hpp
 	$(CUDACC) $(INCDIR) -c $<
 
 
