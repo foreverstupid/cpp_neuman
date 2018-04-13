@@ -1,9 +1,9 @@
 CC=g++
-CUDACC=nvcc
-CFLAGS=-Wall -g -fno-exceptions -DSHOUT
-LIBS=-lm -lfftw3 -lcuda -lcudart -lcufft
-LDFLAGS=-L/usr/local/cuda/lib64
-INCDIR= -I/usr/local/cuda-9.1/include/
+CUDACC=nvcc -g
+CFLAGS=-Wall -g -fno-exceptions -DDEBUG
+LIBS=-lm -lcuda -lcudart -lcufft
+LDFLAGS=-L/opt/cuda/lib64
+INCDIR= -I/opt/cuda/include
 
 SRC=solver.cpp problem.cpp kernels.cpp vector_handler.cpp \
     string_operations.cpp

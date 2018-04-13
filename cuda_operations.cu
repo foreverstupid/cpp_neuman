@@ -22,9 +22,11 @@ void hank_kernel(double *vec, double *res, double step, const int n)
 void cudaHankel(double *kx, double *kb, double *f, double *Hf,
     double step, int n)
 {
-    cudaMemcpy(kx, f, sizeof(double) * n, cudaMemcpyHostToDevice);
+    GPU_ASSERT(cudaMemcpy(kx, f, sizeof(double) * n,
+        cudaMemcpyHostToDevice));
     hank_kernel<<<grid_size, blck_size>>>(kx, kb, step, n);
-    cudaMemcpy(Hf, kb, sizeof(double) * n, cudaMemcpyDeviceToHost);
+    GPU_ASSERT(cudaMemcpy(Hf, kb, sizeof(double) * n,
+        cudaMemcpyDeviceToHost));
 }
 
 
@@ -32,7 +34,8 @@ void cudaHankel(double *kx, double *kb, double *f, double *Hf,
 void cudaFFTForward(cufftHandle plan, double *f, double *cuda_f,
     cufftDoubleComplex *Ff, int n)
 {
-    cudaMemcpy(f, cuda_f, sizeof(double) * n, cudaMemcpyHostToDevice);
+    GPU_ASSERT(cudaMemcpy(cuda_f, f, sizeof(double) * n,
+        cudaMemcpyHostToDevice));
     cufftExecD2Z(plan, cuda_f, Ff);
 }
 
@@ -42,7 +45,8 @@ void cudaFFTBackward(cufftHandle plan, cufftDoubleComplex *Ff,
     double *cuda_f, double *f, int n)
 {
     cufftExecZ2D(plan, Ff, cuda_f);
-    cudaMemcpy(cuda_f, f, sizeof(double) * n, cudaMemcpyDeviceToHost);
+    GPU_ASSERT(cudaMemcpy(f, cuda_f, sizeof(double) * n,
+        cudaMemcpyDeviceToHost));
 }
 
 

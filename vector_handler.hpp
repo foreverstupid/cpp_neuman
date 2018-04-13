@@ -1,7 +1,6 @@
 #ifndef VECTOR_HANDLER_CLASS_HPP
 #define VECTOR_HANDLER_CLASS_HPP
 
-#include <fftw3.h>
 #include <math.h>
 #include <stdio.h>
 

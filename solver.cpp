@@ -149,12 +149,17 @@ void SolverFFT::initConvolving(const Problem &p)
 {
     int n = p.nodes();
 
-    cudaMalloc((void **)&tmp_C, sizeof(cufftDoubleComplex) * (n + 1));
-    cudaMalloc((void **)&tmp_wC, sizeof(cufftDoubleComplex) * (n + 1));
-    cudaMalloc((void **)&tmp_back, sizeof(cufftDoubleComplex) * (n + 1));
-    cudaMalloc((void **)&fft_m, sizeof(cufftDoubleComplex) * (n + 1));
-    cudaMalloc((void **)&fft_w, sizeof(cufftDoubleComplex) * (n + 1));
-    cudaMalloc((void **)&cuda_tmp, sizeof(double) * 2 * n);
+    GPU_ASSERT(cudaMalloc((void **)&tmp_C,
+        sizeof(cufftDoubleComplex) * (n + 1)));
+    GPU_ASSERT(cudaMalloc((void **)&tmp_wC,
+        sizeof(cufftDoubleComplex) * (n + 1)));
+    GPU_ASSERT(cudaMalloc((void **)&tmp_back,
+        sizeof(cufftDoubleComplex) * (n + 1)));
+    GPU_ASSERT(cudaMalloc((void **)&fft_m,
+        sizeof(cufftDoubleComplex) * (n + 1)));
+    GPU_ASSERT(cudaMalloc((void **)&fft_w,
+        sizeof(cufftDoubleComplex) * (n + 1)));
+    GPU_ASSERT(cudaMalloc((void **)&cuda_tmp, sizeof(double) * 2 * n));
 
     cufftPlan1d(&forward_C, 2 * n, CUFFT_R2C, 1);
     cufftPlan1d(&forward_wC, 2 * n, CUFFT_R2C, 1);
@@ -202,12 +207,12 @@ void SolverFFT::getMWFFT(const Problem &p)
 
 void SolverFFT::clearConvolving()
 {
-    cudaFree(tmp_C);
-    cudaFree(tmp_wC);
-    cudaFree(tmp_back);
-    cudaFree(fft_m);
-    cudaFree(fft_w);
-    cudaFree(cuda_tmp);
+    GPU_ASSERT(cudaFree(tmp_C));
+    GPU_ASSERT(cudaFree(tmp_wC));
+    GPU_ASSERT(cudaFree(tmp_back));
+    GPU_ASSERT(cudaFree(fft_m));
+    GPU_ASSERT(cudaFree(fft_w));
+    GPU_ASSERT(cudaFree(cuda_tmp));
 
     cufftDestroy(forward_C);
     cufftDestroy(forward_wC);
@@ -281,8 +286,8 @@ void SolverDHT::initConvolving(const Problem &p)
     Hw_mult_C = new double[p.nodes()];
     tmp = new double[p.nodes()];
 
-    cudaMalloc((void **)&kx, sizeof(double) * p.nodes());
-    cudaMalloc((void **)&kb, sizeof(double) * p.nodes());
+    GPU_ASSERT(cudaMalloc((void **)&kx, sizeof(double) * p.nodes()));
+    GPU_ASSERT(cudaMalloc((void **)&kb, sizeof(double) * p.nodes()));
 
     getDHT(m, Hm, p.step(), p.nodes());
     getDHT(w, Hw, p.step(), p.nodes());
@@ -298,8 +303,8 @@ void SolverDHT::clearConvolving()
     delete[] Hw_mult_C;
     delete[] tmp;
 
-    cudaFree(kx);
-    cudaFree(kb);
+    GPU_ASSERT(cudaFree(kx));
+    GPU_ASSERT(cudaFree(kb));
 }
 
 
