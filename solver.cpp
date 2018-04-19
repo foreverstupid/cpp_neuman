@@ -161,11 +161,11 @@ void SolverFFT::initConvolving(const Problem &p)
         sizeof(cufftDoubleComplex) * (n + 1)));
     GPU_ASSERT(cudaMalloc((void **)&cuda_tmp, sizeof(double) * 2 * n));
 
-    cufftPlan1d(&forward_C, 2 * n, CUFFT_R2C, 1);
-    cufftPlan1d(&forward_wC, 2 * n, CUFFT_R2C, 1);
-    cufftPlan1d(&backward_mC, 2 * n, CUFFT_C2R, 1);
-    cufftPlan1d(&backward_wC, 2 * n, CUFFT_C2R, 1);
-    cufftPlan1d(&backward_CwC, 2 * n, CUFFT_C2R, 1);
+    CUFFT_ASSERT(cufftPlan1d(&forward_C, 2 * n, CUFFT_D2Z, 1));
+    CUFFT_ASSERT(cufftPlan1d(&forward_wC, 2 * n, CUFFT_D2Z, 1));
+    CUFFT_ASSERT(cufftPlan1d(&backward_mC, 2 * n, CUFFT_Z2D, 1));
+    CUFFT_ASSERT(cufftPlan1d(&backward_wC, 2 * n, CUFFT_Z2D, 1));
+    CUFFT_ASSERT(cufftPlan1d(&backward_CwC, 2 * n, CUFFT_Z2D, 1));
 
     getMWFFT(p);
 }
@@ -191,7 +191,7 @@ void SolverFFT::getMWFFT(const Problem &p)
         }
     }
 
-    cufftPlan1d(&plan, 2 * p.nodes(), CUFFT_R2C, 1);
+    CUFFT_ASSERT(cufftPlan1d(&plan, 2 * p.nodes(), CUFFT_D2Z, 1));
     cudaFFTForward(plan, tmp_m, cuda_tmp, fft_m, p.nodes() * 2);
     cudaFFTForward(plan, tmp_w, cuda_tmp, fft_w, p.nodes() * 2);
 
@@ -200,7 +200,7 @@ void SolverFFT::getMWFFT(const Problem &p)
         delete[] tmp_w;
     }
 
-    cufftDestroy(plan);
+    CUFFT_ASSERT(cufftDestroy(plan));
 }
 
 
@@ -214,11 +214,11 @@ void SolverFFT::clearConvolving()
     GPU_ASSERT(cudaFree(fft_w));
     GPU_ASSERT(cudaFree(cuda_tmp));
 
-    cufftDestroy(forward_C);
-    cufftDestroy(forward_wC);
-    cufftDestroy(backward_mC);
-    cufftDestroy(backward_wC);
-    cufftDestroy(backward_CwC);
+    CUFFT_ASSERT(cufftDestroy(forward_C));
+    CUFFT_ASSERT(cufftDestroy(forward_wC));
+    CUFFT_ASSERT(cufftDestroy(backward_mC));
+    CUFFT_ASSERT(cufftDestroy(backward_wC));
+    CUFFT_ASSERT(cufftDestroy(backward_CwC));
 }
 
 
@@ -334,7 +334,7 @@ void SolverDHT::convolve(double *Hf, double *Hg, double *fg, double step,
     int n)
 {
     for(int i = 0; i < n; i++){
-        tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
+        tmp[i] = Hf[i] * Hg[i];
     }
 
     getDHT(tmp, fg, step, n);
