@@ -17,22 +17,33 @@ public:
 
 
 class KurticKernels : public Kernels{
-    double s0;
-    double s1;
+    double s0m;
+    double s1m;
+    double s0w;
+    double s1w;
 
 public:
-    KurticKernels(double s0, double s1) : s0(s0), s1(s1) {}
+    KurticKernels(double s0, double s1)
+        : s0m(s0), s1m(s1), s0w(s0), s1w(s1) {}
+    KurticKernels(double s0m, double s1m, double s0w, double s1w)
+        : s0m(s0m), s1m(s1m), s0w(s0w), s1w(s1w) {}
 
-    double getS0() const { return s0; }
-    double getS1() const { return s1; }
+    double getS0m() const { return s0m; }
+    double getS1m() const { return s1m; }
+    double getS0w() const { return s0w; }
+    double getS1w() const { return s1w; }
 
     double m(double x) const
     {
         double xx = x * x;
-        return exp(-0.5 * (s0 * xx * xx - s1 * xx) / (1 + xx));
+        return exp(-0.5 * (s0m * xx * xx - s1m * xx) / (1 + xx));
     }
 
-    double w(double x) const { return m(x); }
+    double w(double x) const
+    {
+        double xx = x * x;
+        return exp(-0.5 * (s0w * xx * xx - s1w * xx) / (1 + xx));
+    }
 };
 
 
