@@ -46,9 +46,12 @@ void showArgs(const Problem &problem)
         (&problem.getKernels())))
     {
         printf(
-            "Kurtic kernels: sm = %.5lf, sw = %.5lf\n",
-            kk->getS0(),
-            kk->getS1()
+            "Kurtic kernels: sm0 = %.5lf, sm1 = %.5lf\n"
+            "                sw0 = %.5lf, sw1 = %.5lf\n",
+            kk->getS0m(),
+            kk->getS1m(),
+            kk->getS0w(),
+            kk->getS1w()
         );
     }else if((ke = dynamic_cast<const ExponentKernels *>
         (&problem.getKernels())))
@@ -111,8 +114,17 @@ int main(int argc, char **argv)
     Result answer = solver->solve(equation);
 
 #   ifdef ASCETIC
-    printf("%15.*lf %15.*lf\n", equation.accurancy(), answer.N(),
-        equation.accurancy(), answer.getC0());
+    printf(
+        "%15.*lf %15.*lf %15.*lf %15.*lf\n",
+        equation.accurancy(),
+        answer.N(),
+        equation.accurancy(),
+        answer.getC0(),
+        equation.accurancy(),
+        equation.getDispersionM(),
+        equation.accurancy(),
+        equation.getDispersionW()
+    );
 #   else
     printf("First moment: %.*lf\nC(0) = %.*lf\n",
         equation.accurancy(), answer.N(), equation.accurancy(),

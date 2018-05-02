@@ -40,15 +40,19 @@ public:
 
     /* get integral dot product */
     double getDot(const double *f, const double *g, int size, double step,
-        double origin);
+        double origin) const;
 
     /* return integral norm of vecor */
     double getIntNorm(const double *f, int size, double step,
-        double origin);
+        double origin) const;
+
+    /* return dispersion of vector using it as probability density */
+    double getDispersion(const double *f, int size, double step,
+        double origin) const;
 
 private:
     /* TODO: make jacobian more logical and faster */
-    double jacobian(double x)
+    double jacobian(double x) const
     {
         return
             dim == 1 ? 1.0 :

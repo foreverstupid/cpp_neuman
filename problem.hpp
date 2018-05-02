@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "kernels.hpp"
 #include "string_operations.hpp"
+#include "vector_handler.hpp"
 
 
 
@@ -56,6 +57,10 @@ public:
     int dimension() const { return dim; }
     int accurancy() const { return acc; }
     const char *path() const { return _path; }
+
+    /* some useful properties */
+    double getDispersionM() const;
+    double getDispersionW() const;
 
 private:
     int handleArgument(int *i, char **argv);

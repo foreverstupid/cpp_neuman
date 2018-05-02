@@ -1,7 +1,7 @@
 #include "vector_handler.hpp"
 
 double VectorHandler::getDot(const double *f, const double *g, int size,
-    double step, double origin)
+    double step, double origin) const
 {
     double res = 0.0;
     double x = origin;
@@ -17,7 +17,7 @@ double VectorHandler::getDot(const double *f, const double *g, int size,
 
 
 double VectorHandler::getIntNorm(const double *f, int size, double step,
-    double origin)
+    double origin) const
 {
     double res = 0.0;
     double x = origin;
@@ -84,4 +84,24 @@ void VectorHandler::shiftLeft(double *f, int size, int shft)
     for(int i = 0; i < size; i++){
         f[i] = f[i + shft];
     }
+}
+
+
+
+double VectorHandler::getDispersion(const double *f, int size, double step,
+    double origin) const
+{
+    double res;
+    double *xs = new double[size];
+    double x = origin;
+
+    for(int i = 0; i < size; i++){
+        xs[i] = x * x;
+        x += step;
+    }
+
+    res = getDot(f, xs, size, step, origin);
+    delete[] xs;
+
+    return res;
 }
