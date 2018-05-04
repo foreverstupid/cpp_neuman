@@ -1,5 +1,7 @@
 # Equilibrium problem solution in 1D
 
+NOT FULL VERSION!!!
+
 This project was made for the equilibrium problem solution that appears in
 the Ulf Dieckmann's model of ecological systems. Neuman's method is used for
 solving this problem. Second order parametrized closure is used in this
@@ -64,8 +66,11 @@ programm.
     n - normal kernels. Parameters: two real numbers (sigma for death and
     sigma for birth).
 
-    k - kurtic kernels. Parameters: two real numbers (first difines
+    k - equal kurtic kernels. Parameters: two real numbers (first difines
     s_1^m and s_1^w, second - s_2^m and s_2^w).
+
+    K - general kurtic kernels. Parameters: four real numbers: s_1^m,
+    s_2^m, s_1^w and s_2^w.
 
     e - Danchenko's exponential kerenels. Parameters: two real numbers
     (A and B parameters).
