@@ -105,3 +105,27 @@ double VectorHandler::getDispersion(const double *f, int size, double step,
 
     return res;
 }
+
+
+
+double VectorHandler::getKurtosis(const double *f, int size, double step,
+    double origin) const
+{
+    double res;
+    double *xs = new double[size];
+    double x = origin;
+    double xx;
+    double disp;
+
+    for(int i = 0; i < size; i++){
+        xx = x * x;
+        xs[i] = xx * xx;
+        x += step;
+    }
+
+    disp = getDispersion(f, size, step, origin);
+    res = getDot(f, xs, size, step, origin) / (disp * disp);
+    delete[] xs;
+
+    return res;
+}

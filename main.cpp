@@ -8,11 +8,13 @@
 #define REFERENCE_MESSAGE "List of possible cmd arguments:\n" \
 "-k*   - set kernel type, where * is one of the letters:\n" \
 "    n - normal kernels\n" \
-"    k - kurtic kernels\n" \
+"    k - kurtic kernels where m(x) = w(x)\n" \
+"    K - general kurtic kernels\n" \
 "    e - exponential Danchencko kernels\n" \
 "After kernel type you must write kernel parameters:\n\n" \
 "    birth and death kernel dispertion for normal kernels\n" \
 "    s0 and s1 parameters for kurtic kernels\n" \
+"    s0m, s1m, s0w and s1w parameters for general kurtic kernels\n" \
 "    A and B parameters for Danchencko kernels\n\n" \
 "-a    - alpha parameter of closure\n" \
 "-d    - environment death parameter\n" \
@@ -115,7 +117,7 @@ int main(int argc, char **argv)
 
 #   ifdef ASCETIC
     printf(
-        "%15.*lf %15.*lf %15.*lf %15.*lf\n",
+        "%15.*lf %15.*lf %15.*lf %15.*lf %15.*lf %15.*lf\n",
         equation.accurancy(),
         answer.N(),
         equation.accurancy(),
@@ -123,7 +125,11 @@ int main(int argc, char **argv)
         equation.accurancy(),
         equation.getDispersionM(),
         equation.accurancy(),
-        equation.getDispersionW()
+        equation.getDispersionW(),
+        equation.accurancy(),
+        equation.getExcessM(),
+        equation.accurancy(),
+        equation.getExcessW()
     );
 #   else
     printf("First moment: %.*lf\nC(0) = %.*lf\n",

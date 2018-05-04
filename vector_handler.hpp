@@ -50,6 +50,13 @@ public:
     double getDispersion(const double *f, int size, double step,
         double origin) const;
 
+    /* return kurtosis of vector using it as probability density,
+     * with expected value equals 0
+     */
+    double getKurtosis(const double *f, int size, double step,
+        double origin) const;
+
+
 private:
     /* TODO: make jacobian more logical and faster */
     double jacobian(double x) const

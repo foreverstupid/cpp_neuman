@@ -61,6 +61,8 @@ public:
     /* some useful properties */
     double getDispersionM() const;
     double getDispersionW() const;
+    double getExcessM() const;
+    double getExcessW() const;
 
 private:
     int handleArgument(int *i, char **argv);

@@ -201,3 +201,47 @@ double Problem::getDispersionW() const
 
     return res / nw;
 }
+
+
+
+double Problem::getExcessM() const
+{
+    double res;
+    double *m = new double[n_count];
+    double x = orgn;
+    double nm;
+    VectorHandler vh = VectorHandler(dim);
+
+    for(int i = 0; i < n_count; i++){
+        m[i] = kernels->m(x);
+        x += _step;
+    }
+
+    nm = vh.getIntNorm(m, n_count, _step, orgn);
+    res = vh.getKurtosis(m, n_count, _step, orgn);
+    delete[] m;
+
+    return res * nm - 3.0;
+}
+
+
+
+double Problem::getExcessW() const
+{
+    double res;
+    double *w = new double[n_count];
+    double x = orgn;
+    double nw;
+    VectorHandler vh = VectorHandler(dim);
+
+    for(int i = 0; i < n_count; i++){
+        w[i] = kernels->w(x);
+        x += _step;
+    }
+
+    nw = vh.getIntNorm(w, n_count, _step, orgn);
+    res = vh.getKurtosis(w, n_count, _step, orgn);
+    delete[] w;
+
+    return res * nw - 3.0;
+}
