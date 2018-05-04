@@ -36,13 +36,13 @@ public:
     double m(double x) const
     {
         double xx = x * x;
-        return exp(-0.5 * (s0m * xx * xx + s1m * xx) / (1 + xx));
+        return exp(-0.5 * (s0m * xx + s1m * xx * xx) / (1 + xx));
     }
 
     double w(double x) const
     {
         double xx = x * x;
-        return exp(-0.5 * (s0w * xx * xx + s1w * xx) / (1 + xx));
+        return exp(-0.5 * (s0w * xx + s1w * xx * xx) / (1 + xx));
     }
 };
 
