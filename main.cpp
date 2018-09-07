@@ -111,26 +111,21 @@ int main(int argc, char **argv)
     if(equation.dimension() == 1 || equation.dimension() == 3){
         solver = new SolverFFT();
     }else{
-        solver = new SolverDHT();
+        /*
+         * TEMPORARY OUT OF ORDER
+         */
+        //solver = new SolverDHT();
     }
     Result answer = solver->solve(equation);
 
 #   ifdef ASCETIC
+
     printf(
-        "%15.*lf %15.*lf %15.*lf %15.*lf %15.*lf %15.*lf\n",
+        "%15.*lf\n",
         equation.accurancy(),
-        answer.N(),
-        equation.accurancy(),
-        answer.getC0(),
-        equation.accurancy(),
-        equation.getDispersionM(),
-        equation.accurancy(),
-        equation.getDispersionW(),
-        equation.accurancy(),
-        equation.getExcessM(),
-        equation.accurancy(),
-        equation.getExcessW()
+        answer.N()
     );
+
 #   else
     printf("First moment: %.*lf\nC(0) = %.*lf\n",
         equation.accurancy(), answer.N(), equation.accurancy(),

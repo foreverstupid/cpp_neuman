@@ -10,3 +10,4 @@ deps.mk
 rubbish
 tmp
 values
+*.txt

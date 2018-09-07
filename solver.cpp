@@ -6,6 +6,13 @@
 Result AbstractSolver::solve(const Problem &p)
 {
     init(p);
+        /* ----------- delete this -------------- */
+        //double *err = new double[p.nodes()];
+        double hlp;
+        //FILE *out = fopen("err_int.txt", "w");
+        /* ----------- delete this -------------- */
+
+
 #   if defined(SHOUT) && !defined(ASCETIC)
     printf("Progress: ");
     bar_chars = 0;
@@ -49,17 +56,23 @@ Result AbstractSolver::solve(const Problem &p)
 #       endif
 
         for(int j = 0; j < p.nodes(); j++){
-            C[j] = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
+            hlp = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
                 ((C[j] + 2) * wC[j] + CwC[j])) /
                 (w[j] + p.b() - p.alpha() / 2 *
                 (p.b() - p.d() - p.s() * N));
+        //    err[j] = fabs(hlp - C[j]) / (fabs(C[j]) + 1e-12);
+            C[j] = hlp;
         }
+      //  double a = vh.getIntNorm(err, p.nodes(), p.step(), p.origin());
+      //  fprintf(out, "%d %20.10lf\n", i, a);
     }
 
     /* correcting second moment */
     for(int i = 0; i < p.nodes(); i++){
         C[i]++;
     }
+    N = (p.b() - p.d()) /
+        (vh.getDot(C, w, p.nodes(), p.step(), p.origin()));
 
 #   if defined(SHOUT) && !defined(ASCETIC)
     for(; bar_chars < BAR_WIDTH; bar_chars++){
@@ -69,6 +82,8 @@ Result AbstractSolver::solve(const Problem &p)
 #   endif
 
     clear();
+   // delete[] err;
+   // fclose(out);
 
     return Result(N, C, p.nodes(), p.dimension());
 }
@@ -295,11 +310,13 @@ void SolverFFT::convolve(const fftw_complex *f, const fftw_complex *g,
 
 
 
-
+/*
+ * TEMPORARY OUT OF ORDER
+ */
 /*=====================================================================*/
 /*                         SOLVER DHT METHODS                          */
 /*=====================================================================*/
-void SolverDHT::initConvolving(const Problem &p)
+/*void SolverDHT::initConvolving(const Problem &p)
 {
     Hm = new double[p.nodes()];
     Hw = new double[p.nodes()];
@@ -359,4 +376,4 @@ void SolverDHT::convolve(double *Hf, double *Hg, double *fg, double step,
     }
 
     getDHT(tmp, fg, step, n);
-}
+}*/
