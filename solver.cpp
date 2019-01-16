@@ -69,10 +69,8 @@ Result AbstractSolver::solve(const Problem &p)
 
     /* correcting second moment */
     for(int i = 0; i < p.nodes(); i++){
-        C[i]++;
+        C[i] = (C[i] + 1);
     }
-    N = (p.b() - p.d()) /
-        (vh.getDot(C, w, p.nodes(), p.step(), p.origin()));
 
 #   if defined(SHOUT) && !defined(ASCETIC)
     for(; bar_chars < BAR_WIDTH; bar_chars++){
@@ -306,6 +304,91 @@ void SolverFFT::convolve(const fftw_complex *f, const fftw_complex *g,
         res[i] *= p.step() / (p.nodes() * 2);
     }
 }
+
+
+
+
+
+/*=====================================================================*/
+/*                         SOLVER DHT METHODS                          */
+/*=====================================================================*/
+void SolverDHT::initConvolving(const Problem &p)
+{
+    DHTMatrix = getHankelMatrix(p.nodes(), p.step());
+
+    Hm = new double[p.nodes()];
+    Hw = new double[p.nodes()];
+    HC = new double[p.nodes()];
+    Hw_mult_C = new double[p.nodes()];
+    tmp = new double[p.nodes()];
+
+    VectorHandler::multiplyMatVec(DHTMatrix, m, Hm, p.nodes());
+    VectorHandler::multiplyMatVec(DHTMatrix, w, Hw, p.nodes());
+}
+
+
+
+void SolverDHT::clearConvolving()
+{
+    delete[] DHTMatrix;
+    delete[] Hm;
+    delete[] Hw;
+    delete[] HC;
+    delete[] Hw_mult_C;
+    delete[] tmp;
+}
+
+
+
+void SolverDHT::getConvolutions(const Problem &p)
+{
+    VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
+
+    VectorHandler::multiplyMatVec(DHTMatrix, C, HC, p.nodes());
+    VectorHandler::multiplyMatVec(DHTMatrix, w_mult_C, Hw_mult_C,
+        p.nodes());
+
+    convolve(HC, Hm, mC, p.nodes());
+    convolve(HC, Hw, wC, p.nodes());
+    convolve(HC, Hw_mult_C, CwC, p.nodes());
+}
+
+
+
+void SolverDHT::convolve(double *Hf, double *Hg, double *fg, int n)
+{
+    for(int i = 0; i < n; i++){
+        tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
+    }
+
+    VectorHandler::multiplyMatVec(DHTMatrix, tmp, fg, n);
+}
+
+
+
+double *SolverDHT::getHankelMatrix(int n, double step)
+{
+    double x;
+    double y = 0.0;
+    double *res = new double[n * n];
+
+    for(int i = 0; i < n; i++){
+        x = 0.0;
+        for(int j = 0; j < n; j++){
+            res[i * n + j] = j0(x * y) * x *
+                VectorHandler::weight(j, n, step);
+            x += step;
+        }
+        y += step;
+    }
+
+    //for(int i = 0; i < n; i++){
+    //    res[i] = res[i * n] = 1.0;
+    //}
+
+    return res;
+}
+
 
 
 
