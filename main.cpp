@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     if(equation.dimension() == 1 || equation.dimension() == 3){
         solver = new SolverFFT();
     }else{
-        solver = new SolverDHT();
+        solver = new SolverDHTNaive();
     }
     Result answer = solver->solve(equation);
 

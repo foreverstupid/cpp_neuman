@@ -393,6 +393,86 @@ double *SolverDHT::getHankelMatrix(int n, double step)
 
 
 
+void SolverDHTNaive::initConvolving(const Problem &p)
+{
+    Hm = new double[2 * p.nodes()];
+    Hw = new double[2 * p.nodes()];
+    HC = new double[2 * p.nodes()];
+    Hw_mult_C = new double[p.nodes()];
+    tmp = new double[2 * p.nodes()];
+
+    getHankelTransform(m, Hm, p);
+    getHankelTransform(w, Hw, p);
+}
+
+
+
+void SolverDHTNaive::clearConvolving()
+{
+    delete[] Hm;
+    delete[] Hw;
+    delete[] HC;
+    delete[] Hw_mult_C;
+    delete[] tmp;
+}
+
+
+
+void SolverDHTNaive::getConvolutions(const Problem &p)
+{
+    VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
+    
+    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
+        w_mult_C[i] = C[i] = 0.0;
+    }
+
+    getHankelTransform(C, HC, p);
+    getHankelTransform(w_mult_C, Hw_mult_C, p);
+    convolve(Hm, HC, mC, p);
+    convolve(Hw, HC, wC, p);
+    convolve(Hw_mult_C, HC, CwC, p);
+}
+
+
+
+void SolverDHTNaive::getHankelTransform(const double *f, double *Hf,
+    const Problem &p)
+{
+    double x;
+    double y = 0.0;
+
+    for(int i = p.nodes() / 2; i < p.nodes(); i++){
+        x = 0.0;
+        for(int j = p.nodes() / 2; j < p.nodes(); j++){
+            tmp[j] = j0(x * y);
+            x += p.step();
+        }
+
+        Hf[p.nodes() - i - 1] = Hf[i] = vh.getDot(
+            f + p.nodes() / 2,
+            tmp,
+            p.nodes() / 2,
+            p.step(),
+            p.origin()
+        );
+
+        y += p.step();
+    }
+}
+
+
+
+void SolverDHTNaive::convolve(const double *Hf, const double *Hg,
+    double *fg, const Problem &p)
+{
+    VectorHandler::multiplyVecs(Hf, Hg, tmp, p.nodes());
+    getHankelTransform(tmp, fg, p);
+}
+
+
+
+
+
 /*
  * TEMPORARY OUT OF ORDER
  */

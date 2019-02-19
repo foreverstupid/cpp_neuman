@@ -54,7 +54,7 @@ private:
     /* init new solving process */
     void init(const Problem &p);
 
-    /* inti data for convolving */
+    /* init data for convolving */
     virtual void initConvolving(const Problem &p) = 0;
 
     /* dispose resources after solving process finish */
@@ -121,6 +121,29 @@ class SolverDHT : public AbstractSolver{
 
     /* make convolving vector hankel originals */
     void convolve(double *Hf, double *Hg, double *fg, int n);
+};
+
+
+
+class SolverDHTNaive : public AbstractSolver{
+    double *Hm;             /* kernel Hankel transforms */
+    double *Hw;
+
+    double *HC;             /* tmp arrays for H[C] and H[wC] */
+    double *Hw_mult_C;
+    
+    double *tmp;            /* tmp array */
+
+    void initConvolving(const Problem &p);
+    void clearConvolving();
+    void getConvolutions(const Problem &p);
+
+    /* get Hankel transform */
+    void getHankelTransform(const double *f, double *Hf, const Problem &p);
+    
+    /* make convolving using Hankel images of functions */
+    void convolve(const double *Hf, const double *Hg, double *fg,
+        const Problem &p);
 };
 
 /*
