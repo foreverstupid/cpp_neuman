@@ -46,6 +46,11 @@ int Problem::init(int argc, char **argv)
         }
     }
 
+    if(_R < 0)
+    {
+        _R = getR();    
+    }
+
     _step = _R / (n_count - 1);
     orgn = 0.0;
 
@@ -66,7 +71,14 @@ int Problem::handleArgument(int *i, char **argv)
             i_count = str2int(argv[*i + 1]);
             break;
         case 'r':
-            _R = str2double(argv[*i + 1]);
+            if(argv[*i + 1][0] == 'n' && argv[*i + 1][1] == 0)
+            {
+                _R = -1.0;
+            }
+            else
+            {
+                _R = str2double(argv[*i + 1]);
+            }
             break;
         case 'D':
             dim = str2int(argv[*i + 1]);
@@ -240,4 +252,19 @@ double Problem::getExcessW() const
     delete[] w;
 
     return res - 3.0;
+}
+
+
+
+double Problem::getR()
+{
+    double eps = 1e-7;
+    double step = 1e-5;
+    double x = 0.0;
+
+    while(fabs(kernels->m(x)) > eps || fabs(kernels->w(x)) > eps){
+        x += step;
+    }
+
+    return x;
 }
