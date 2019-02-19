@@ -46,8 +46,7 @@ int Problem::init(int argc, char **argv)
         }
     }
 
-    if(_R < 0)
-    {
+    if(_R < 0.0){
         _R = getR();    
     }
 
@@ -71,12 +70,9 @@ int Problem::handleArgument(int *i, char **argv)
             i_count = str2int(argv[*i + 1]);
             break;
         case 'r':
-            if(argv[*i + 1][0] == 'n' && argv[*i + 1][1] == 0)
-            {
+            if(argv[*i + 1][0] == 'n' && !argv[*i + 1][1]){
                 _R = -1.0;
-            }
-            else
-            {
+            }else{
                 _R = str2double(argv[*i + 1]);
             }
             break;
@@ -89,7 +85,7 @@ int Problem::handleArgument(int *i, char **argv)
             break;
         case 'p':
             _path = argv[*i + 1];
-            if(_path[0] == 'n'){
+            if(_path[0] == 'n' && !_path[1]){
                 _path = 0;
             }
             break;
