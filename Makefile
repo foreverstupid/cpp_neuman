@@ -1,6 +1,6 @@
 CC=g++
 CUDACC=nvcc
-CFLAGS=-Wall -O3 -Ofast -fno-exceptions -ASCETIC
+CFLAGS=-Wall -O3 -Ofast -fno-exceptions -DASCETIC
 LIBS=-lm -lfftw3# -lcuda -lcudart
 LDFLAGS=-L/opt/cuda/lib64
 INCDIR= -I/opt/cuda/include/
