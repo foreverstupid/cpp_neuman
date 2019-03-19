@@ -65,7 +65,7 @@ void VectorHandler::storeVector(const double *f, const char *path,
 
     for(int i = 0; i < size; i++){
         fprintf(out,
-            "%15.*lf %15.*lf\n",
+            "%.*lf %.*lf\n",
             accurancy,
             x,
             accurancy,
