@@ -56,10 +56,18 @@ Result AbstractSolver::solve(const Problem &p)
 #       endif
 
         for(int j = 0; j < p.nodes(); j++){
-            hlp = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
+           /* hlp = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
                 ((C[j] + 2) * wC[j] + CwC[j])) /
                 (w[j] + p.b() - p.alpha() / 2 *
-                (p.b() - p.d() - p.s() * N));
+                (p.b() - p.d() - p.s() * N)); */
+
+            hlp = (m[j] / N - w[j] + mC[j] + p.b() - p.d() -
+                N / (p.alpha() + p.gamma()) * 
+                (p.alpha() * (p.b() - p.d()) / N +
+                p.beta() * (wC[j] + CwC[j]) +
+                p.gamma() * ((p.b() - p.d()) / N + wC[j] + CwC[j]))) /
+                (p.d() + w[j] + N / (p.alpha() + p.gamma()) *
+                p.alpha() * (p.b() - p.d()) / N  + p.beta() * p.s());
         //    err[j] = fabs(hlp - C[j]) / (fabs(C[j]) + 1e-12);
             C[j] = hlp;
         }

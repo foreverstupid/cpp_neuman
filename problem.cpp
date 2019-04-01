@@ -11,7 +11,9 @@ Problem::Problem()
     _b = 1.0;
     _s = 1.0;
     _d = 0.0;
-    _alpha = 0.0;
+    _alpha = 1.0;
+    _beta = 0.0;
+    _gamma = 0.0;
 
     _R = 20.0;
     n_count = 5000;
@@ -94,8 +96,14 @@ int Problem::handleArgument(int *i, char **argv)
                 return res;
             }
             break;
-        case 'a':
+        case 'A':
             _alpha = str2double(argv[*i + 1]);
+            break;
+        case 'B':
+            _beta = str2double(argv[*i + 1]);
+            break;
+        case 'G':
+            _gamma = str2double(argv[*i + 1]);
             break;
         case 'd':
             _d = str2double(argv[*i + 1]);

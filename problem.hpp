@@ -17,7 +17,10 @@ class Problem{
     double _b;          /* birth rate */
     double _s;          /* competition rate */
     double _d;          /* death rate */
-    double _alpha;      /* closure parameter */
+
+    double _alpha;      /* closure parameters */
+    double _beta;
+    double _gamma;
 
     int i_count;        /* iteration count */
     int n_count;        /* nodes count */
@@ -49,6 +52,8 @@ public:
     double s() const { return _s; }
     double d() const { return _d; }
     double alpha() const { return _alpha; }
+    double beta() const { return _beta; }
+    double gamma() const { return _gamma; }
     int iters() const { return i_count; }
     int nodes() const { return n_count; }
     double origin() const { return orgn; }
