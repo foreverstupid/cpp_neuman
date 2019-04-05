@@ -12,8 +12,8 @@ Problem::Problem()
     _s = 1.0;
     _d = 0.0;
     _alpha = 1.0;
-    _beta = 0.0;
-    _gamma = 0.0;
+    _beta = 1.0;
+    _gamma = 1.0;
 
     _R = 20.0;
     n_count = 5000;
@@ -153,6 +153,15 @@ int Problem::setKernels(int *i, char **argv)
             );
             *i += 2;
             break;
+        case 'r':
+            kernels = new RoughgardenKernels(
+                str2double(argv[*i + 1]),
+                str2double(argv[*i + 2]),
+                str2double(argv[*i + 3]),
+                str2double(argv[*i + 4])
+            );
+            *i += 2;
+            break;
         case 'n':
             kernels = new NormalKernels(
                 str2double(argv[*i + 1]),
@@ -172,90 +181,6 @@ int Problem::setKernels(int *i, char **argv)
 
     *i += 1;
     return success;
-}
-
-
-
-double Problem::getDispersionM() const
-{
-    double res;
-    double *m = new double[n_count];
-    double x = orgn;
-    double nm;
-    VectorHandler vh = VectorHandler(dim);
-
-    for(int i = 0; i < n_count; i++){
-        m[i] = kernels->m(x);
-        x += _step;
-    }
-
-    nm = vh.getIntNorm(m, n_count, _step, orgn);
-    res = vh.getDispersion(m, n_count, _step, orgn);
-    delete[] m;
-
-    return res / nm;
-}
-
-
-
-double Problem::getDispersionW() const
-{
-    double res;
-    double *w = new double[n_count];
-    double x = orgn;
-    double nw;
-    VectorHandler vh = VectorHandler(dim);
-
-    for(int i = 0; i < n_count; i++){
-        w[i] = kernels->w(x);
-        x += _step;
-    }
-
-    nw = vh.getIntNorm(w, n_count, _step, orgn);
-    res = vh.getDispersion(w, n_count, _step, orgn);
-    delete[] w;
-
-    return res / nw;
-}
-
-
-
-double Problem::getExcessM() const
-{
-    double res;
-    double *m = new double[n_count];
-    double x = orgn;
-    VectorHandler vh = VectorHandler(dim);
-
-    for(int i = 0; i < n_count; i++){
-        m[i] = kernels->m(x);
-        x += _step;
-    }
-
-    res = vh.getKurtosis(m, n_count, _step, orgn);
-    delete[] m;
-
-    return res - 3.0;
-}
-
-
-
-double Problem::getExcessW() const
-{
-    double res;
-    double *w = new double[n_count];
-    double x = orgn;
-    VectorHandler vh = VectorHandler(dim);
-
-    for(int i = 0; i < n_count; i++){
-        w[i] = kernels->w(x);
-        x += _step;
-    }
-
-    res = vh.getKurtosis(w, n_count, _step, orgn);
-    delete[] w;
-
-    return res - 3.0;
 }
 
 

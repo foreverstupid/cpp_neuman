@@ -101,4 +101,34 @@ public:
     }
 };
 
+
+
+class RoughgardenKernels : public Kernels{
+    double sm;
+    double gm;
+    double sw;
+    double gw;
+
+public:
+    RoughgardenKernels(double s, double g)
+        : sm(s), gm(g), sw(s), gw(g) {}
+    RoughgardenKernels(double sm, double gm, double sw, double gw)
+        : sm(sm), gm(gm), sw(sw), gw(gw) {}
+
+    double getSM() const { return sm; }
+    double getGM() const { return gm; }
+    double getSW() const { return sw; }
+    double getGW() const { return sw; }
+
+    double m(double x) const
+    {
+        return exp(-pow(fabs(x / sm), gm));
+    }
+
+    double w(double x) const
+    {
+        return exp(-pow(fabs(x / sw), gw));
+    }
+};
+
 #endif

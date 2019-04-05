@@ -11,12 +11,16 @@
 "    k - kurtic kernels where m(x) = w(x)\n" \
 "    K - general kurtic kernels\n" \
 "    e - exponential Danchencko kernels\n" \
+"    r - roughgarden kernels\n" \
 "After kernel type you must write kernel parameters:\n\n" \
 "    birth and death kernel dispertion for normal kernels\n" \
 "    s0 and s1 parameters for kurtic kernels\n" \
 "    s0m, s1m, s0w and s1w parameters for general kurtic kernels\n" \
-"    A and B parameters for Danchencko kernels\n\n" \
-"-a    - alpha parameter of closure\n" \
+"    A and B parameters for Danchencko kernels\n" \
+"    sm, gamma_m, sw and gamma_w parameters for roughgarden kernels\n\n"\
+"-A    - alpha parameter of second order closure\n" \
+"-B    - beta parameter of second order closure\n" \
+"-G    - gamma parameter of second order closure\n" \
 "-d    - environment death parameter\n" \
 "-b    - kind birth parameter\n" \
 "-s    - kind death parameter\n" \
@@ -63,11 +67,23 @@ void showArgs(const Problem &problem)
             ke->getA(),
             ke->getB()
         );
-    }
+    }else if((kk = dynamic_cast<const RoughgardenKernels *>
+        (&problem.getKernels())))
+    {
+        printf(
+            "Roughgarden kernels: sm = %.5lf, gamma_m = %.5lf\n"
+            "                     sw = %.5lf, gamma_w = %.5lf\n",
+            kk->getSM(),
+            kk->getGM(),
+            kk->getSW(),
+            kk->getGW()
+        );
+
 
     printf(
         "R = %10.5lf\nn_count = %d\ni_count = %d\nb = %10.5lf\n"
-        "s = %10.5lf\nd = %10.5lf\nalpha = %10.5lf\naccurancy = %d\n"
+        "s = %10.5lf\nd = %10.5lf\nalpha = %10.5lf\nbeta = %10.5lf\n"
+        "gamma = %10.5lf\naccurancy = %d\n"
         "step = %10.5lf\ndimension = %d\n",
         problem.R(),
         problem.nodes(),
@@ -76,6 +92,8 @@ void showArgs(const Problem &problem)
         problem.s(),
         problem.d(),
         problem.alpha(),
+        problem.beta(),
+        problem.gamma(),
         problem.accurancy(),
         problem.step(),
         problem.dimension()
