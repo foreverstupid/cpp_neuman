@@ -15,7 +15,7 @@ Problem::Problem()
     _beta = 1.0;
     _gamma = 1.0;
 
-    _R = 20.0;
+    _R = -1.0;
     n_count = 5000;
     i_count = 1000;
     dim = 1;
