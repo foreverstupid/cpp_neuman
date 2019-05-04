@@ -143,6 +143,7 @@ int main(int argc, char **argv)
             printf(REFERENCE_MESSAGE);
             return 0;
         }else{
+            printf("\nRun \"%s -h\" to get reference\n", argv[0]);
             return 1;
         }
     }
