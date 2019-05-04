@@ -7,7 +7,7 @@
 
 #define REFERENCE_MESSAGE "EQUILIBRIUM EQUATION SOLVER\n\n"\
 "This program is used for solving an integral equation that appears\n"\
-"in the Ulf Dieckmann biological model in a one kind case. This\n"\
+"in the Ulf Dieckmann's biological model in a one kind case. This\n"\
 "equation describes space moments dynamics. The program uses general\n"\
 "second order closure of the third moment:\n\n"\
 "              1   C(x)C(y)    C(x)C(y-x)    C(y)C(y-x)\n"\
@@ -22,12 +22,14 @@
 "    K - general kurtic kernels\n"\
 "    e - exponential Danchencko kernels\n"\
 "    r - roughgarden kernels\n"\
+"    p - exponent polynomial kernels\n"\
 "    After kernel type you must write kernel parameters:\n"\
 "      + birth and death kernel dispertion for normal kernels\n"\
 "      + s0 and s1 parameters for kurtic kernels\n"\
 "      + s0m, s1m, s0w and s1w parameters for general kurtic kernels\n"\
 "      + A and B parameters for Danchencko kernels\n"\
 "      + sm, gamma_m, sw and gamma_w parameters for roughgarden kernels\n"\
+"      + am, bm, aw and bw parameters for exponent polynomial kernels\n"\
 "-A - alpha parameter of second order closure\n"\
 "-B - beta parameter of second order closure\n"\
 "-G - gamma parameter of second order closure\n"\
@@ -89,7 +91,19 @@ void showArgs(const Problem &problem)
             kr->getSW(),
             kr->getGW()
         );
+    }else if((kr = dynamic_cast<const ExponentPolynomialKernels *>
+        (&problem.getKernels())))
+    {
+        printf(
+            "Exponent polynomial kernels: sm = %.5lf, gamma_m = %.5lf\n"
+            "                             sw = %.5lf, gamma_w = %.5lf\n",
+            kr->getAM(),
+            kr->getBM(),
+            kr->getAW(),
+            kr->getBW()
+        );
     }
+
 
 
     printf(

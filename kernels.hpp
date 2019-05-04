@@ -131,4 +131,36 @@ public:
     }
 };
 
+
+
+class ExponentPolynomialKernels : public Kernels{
+    double am;
+    double bm;
+    double aw;
+    double bw;
+
+public:
+    ExponentPolynomialKernels(double a, double b)
+        : am(a), bm(b), aw(a), bw(b) {}
+    ExponentPolynomialKernels(double am, double bm, double aw, double bw)
+        : am(am), bm(bm), aw(aw), bw(bw) {}
+
+    double getAM() const { return am; }
+    double getBM() const { return bm; }
+    double getAW() const { return aw; }
+    double getBW() const { return bw; }
+
+    double m(double x) const
+    {
+        double xx = x * x;
+        return exp(-am * xx - bm * xx * xx);
+    }
+
+    double w(double x) const
+    {
+        double xx = x * x;
+        return exp(-aw * xx - bw * xx * xx);
+    }
+};
+
 #endif

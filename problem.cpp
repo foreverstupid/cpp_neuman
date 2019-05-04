@@ -162,6 +162,15 @@ int Problem::setKernels(int *i, char **argv)
             );
             *i += 2;
             break;
+        case 'p':
+            kernels = new ExponentPolynomialKernels(
+                str2double(argv[*i + 1]),
+                str2double(argv[*i + 2]),
+                str2double(argv[*i + 3]),
+                str2double(argv[*i + 4])
+            );
+            *i += 2;
+            break;
         case 'n':
             kernels = new NormalKernels(
                 str2double(argv[*i + 1]),
