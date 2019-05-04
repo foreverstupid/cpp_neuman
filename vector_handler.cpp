@@ -23,7 +23,7 @@ double VectorHandler::getIntNorm(const double *f, int size, double step,
     double x = origin;
 
     for(int i = 0; i < size; i++){
-        res += f[i] * weight(i, size, step) * jacobian(x);
+        res += fabs(f[i]) * weight(i, size, step) * jacobian(x);
         x += step;
     }
 

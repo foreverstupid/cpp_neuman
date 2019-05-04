@@ -6,12 +6,6 @@
 Result AbstractSolver::solve(const Problem &p)
 {
     init(p);
-        /* ----------- delete this -------------- */
-        //double *err = new double[p.nodes()];
-        double hlp;
-        //FILE *out = fopen("err_int.txt", "w");
-        /* ----------- delete this -------------- */
-
 
 #   if defined(SHOUT) && !defined(ASCETIC)
     printf("Progress: ");
@@ -33,8 +27,7 @@ Result AbstractSolver::solve(const Problem &p)
 
 #       ifndef ASCETIC
 #       ifndef SHOUT
-        printf("Iteration: %d\nN: %.*lf\n", i + 1,
-            p.accurancy(), N);
+        printf("Iteration: %d\nN: %.*lf\n", i + 1, p.accurancy(), N);
 #       else
         while(bar_chars < (double)BAR_WIDTH * i / p.iters()){
             putchar(BAR_CHAR);
@@ -56,28 +49,19 @@ Result AbstractSolver::solve(const Problem &p)
 #       endif
 
         for(int j = 0; j < p.nodes(); j++){
-           /* hlp = (m[j] / N - w[j] + mC[j] - p.alpha() / 2 * N *
-                ((C[j] + 2) * wC[j] + CwC[j])) /
-                (w[j] + p.b() - p.alpha() / 2 *
-                (p.b() - p.d() - p.s() * N)); */
-
-            hlp = (m[j] / N - w[j] + mC[j] + p.b() - p.d() -
+            C[j] = (m[j] / N - w[j] + mC[j] + p.b() - p.d() -
                 N / (p.alpha() + p.gamma()) * 
                 (p.alpha() * (p.b() - p.d()) / N +
                 p.beta() * (wC[j] + CwC[j]) +
                 p.gamma() * ((p.b() - p.d()) / N + wC[j] + CwC[j]))) /
                 (p.d() + w[j] + N / (p.alpha() + p.gamma()) *
                 p.alpha() * (p.b() - p.d()) / N  + p.beta() * p.s());
-        //    err[j] = fabs(hlp - C[j]) / (fabs(C[j]) + 1e-12);
-            C[j] = hlp;
         }
-      //  double a = vh.getIntNorm(err, p.nodes(), p.step(), p.origin());
-      //  fprintf(out, "%d %20.10lf\n", i, a);
     }
 
     /* correcting second moment */
     for(int i = 0; i < p.nodes(); i++){
-        C[i] = (C[i] + 1);
+        C[i] += 1.0;
     }
 
 #   if defined(SHOUT) && !defined(ASCETIC)
@@ -88,9 +72,6 @@ Result AbstractSolver::solve(const Problem &p)
 #   endif
 
     clear();
-   // delete[] err;
-   // fclose(out);
-
     return Result(N, C, p.nodes(), p.dimension());
 }
 
@@ -194,9 +175,8 @@ void SolverFFT::initConvolving(const Problem &p)
 
 void SolverFFT::getMWFFT(const Problem &p)
 {
-    /* hold x * m(x) and x * w(x) in 3D case */
-    double *tmp_m;
-    double *tmp_w;
+    double *tmp_m = 0;
+    double *tmp_w = 0;
 
     fftw_plan m_plan;
     fftw_plan w_plan;
@@ -207,8 +187,8 @@ void SolverFFT::getMWFFT(const Problem &p)
         double x = p.origin();
 
         for(int i = 0; i < 2 * p.nodes(); i++){
-            tmp_m[i] = 4 * M_PI * x * m[i];
-            tmp_w[i] = 4 * M_PI * x * w[i];
+            tmp_m[i] = 4 * M_PI * fabs(x) * m[i];
+            tmp_w[i] = 4 * M_PI * fabs(x) * w[i];
             x += p.step();
         }
 
@@ -229,7 +209,8 @@ void SolverFFT::getMWFFT(const Problem &p)
     fftw_destroy_plan(m_plan);
     fftw_destroy_plan(w_plan);
 
-    if(p.dimension() == 3){
+    if(tmp_m)
+    {
         delete[] tmp_m;
         delete[] tmp_w;
     }
@@ -264,7 +245,7 @@ void SolverFFT::getConvolutions(const Problem &p)
         double x = p.origin();
 
         for(int i = 0; i < p.nodes(); i++){
-            w_mult_C[i] *= 4 * M_PI * x;
+            w_mult_C[i] *= 4 * M_PI * fabs(x);
             x += p.step();
         }
     }
@@ -390,10 +371,6 @@ double *SolverDHT::getHankelMatrix(int n, double step)
         y += step;
     }
 
-    //for(int i = 0; i < n; i++){
-    //    res[i] = res[i * n] = 1.0;
-    //}
-
     return res;
 }
 
@@ -401,6 +378,9 @@ double *SolverDHT::getHankelMatrix(int n, double step)
 
 
 
+/*====================================================================*/
+/*                        SOLVER DHT NAIVE METHODS                    */
+/*====================================================================*/
 void SolverDHTNaive::initConvolving(const Problem &p)
 {
     Hm = new double[2 * p.nodes()];
@@ -476,75 +456,3 @@ void SolverDHTNaive::convolve(const double *Hf, const double *Hg,
     VectorHandler::multiplyVecs(Hf, Hg, tmp, p.nodes());
     getHankelTransform(tmp, fg, p);
 }
-
-
-
-
-
-/*
- * TEMPORARY OUT OF ORDER
- */
-/*=====================================================================*/
-/*                         SOLVER DHT METHODS                          */
-/*=====================================================================*/
-/*void SolverDHT::initConvolving(const Problem &p)
-{
-    Hm = new double[p.nodes()];
-    Hw = new double[p.nodes()];
-    HC = new double[p.nodes()];
-    Hw_mult_C = new double[p.nodes()];
-    tmp = new double[p.nodes()];
-
-    cudaMalloc((void **)&kx, sizeof(double) * p.nodes());
-    cudaMalloc((void **)&kb, sizeof(double) * p.nodes());
-
-    getDHT(m, Hm, p.step(), p.nodes());
-    getDHT(w, Hw, p.step(), p.nodes());
-}
-
-
-
-void SolverDHT::clearConvolving()
-{
-    delete[] Hm;
-    delete[] Hw;
-    delete[] HC;
-    delete[] Hw_mult_C;
-    delete[] tmp;
-
-    cudaFree(kx);
-    cudaFree(kb);
-}
-
-
-
-void SolverDHT::getDHT(double *f, double *Hf, double step, int n)
-{
-    cudaHankel(kx, kb, f, Hf, step, n);
-}
-
-
-
-void SolverDHT::getConvolutions(const Problem &p)
-{
-    VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
-
-    getDHT(C, HC, p.step(), p.nodes());
-    getDHT(w_mult_C, Hw_mult_C, p.step(), p.nodes());
-
-    convolve(HC, Hm, mC, p.step(), p.nodes());
-    convolve(HC, Hw, wC, p.step(), p.nodes());
-    convolve(HC, Hw_mult_C, CwC, p.step(), p.nodes());
-}
-
-
-
-void SolverDHT::convolve(double *Hf, double *Hg, double *fg, double step,
-    int n)
-{
-    for(int i = 0; i < n; i++){
-        tmp[i] = 4 * M_PI * M_PI * Hf[i] * Hg[i];
-    }
-
-    getDHT(tmp, fg, step, n);
-}*/

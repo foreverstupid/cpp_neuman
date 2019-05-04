@@ -1,15 +1,13 @@
-#ifndef SOLVER_CLASS_HPP
-#define SOLVER_CLASS_HPP
+#ifndef SOLVER_CLASSES_HPP
+#define SOLVER_CLASSES_HPP
 
 #include <math.h>
 #include <fftw3.h>
 #include "problem.hpp"
 #include "vector_handler.hpp"
-//#include "cuda_vec.hpp"
 #ifdef DEBUG
 #include <stdio.h>
 #endif
-#include <stdio.h>
 
 #if defined(SHOUT) && !defined(ASCETIC)
 
@@ -41,7 +39,7 @@ protected:
     double *mC;             /* samples of [m * C] */
     double *wC;             /* samples of [w * C] */
     double *CwC;            /* samples of [Cw * C] */
-    double *w_mult_C;       /* samples od wC */
+    double *w_mult_C;       /* samples of wC */
 
 public:
     AbstractSolver(){ C = 0; }
@@ -145,31 +143,5 @@ class SolverDHTNaive : public AbstractSolver{
     void convolve(const double *Hf, const double *Hg, double *fg,
         const Problem &p);
 };
-
-/*
- * TEMPORARY OUT OF ORDER!!!
- */
-//class SolverDHT : public AbstractSolver{
-//    double *Hm;             /* hankel transform of kernels */
-//    double *Hw;
-//
-//    double *HC;             /* tmp variables for H[C] and H[wC] */
-//    double *Hw_mult_C;
-
-//    double *tmp;            /* help variables */
-//    double *kx;
-//    double *kb;
-
-
-//    void initConvolving(const Problem &p);
-//    void clearConvolving();
-//    void getConvolutions(const Problem &p);
-
-//    /* get hankel transform of vector */
-//    void getDHT(double *f, double *Hf, double step, int n);
-
-//    /* make convolving vector hankel originals */
-//    void convolve(double *Hf, double *Hg, double *fg, double step, int n);
-//};
 
 #endif

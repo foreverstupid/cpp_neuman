@@ -187,7 +187,7 @@ int Problem::setKernels(int *i, char **argv)
 
 double Problem::getR()
 {
-    double eps = 1e-7;
+    double eps = 1e-9;
     double step = 1e-5;
     double x = 0.0;
 

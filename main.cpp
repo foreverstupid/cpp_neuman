@@ -48,6 +48,7 @@ void showArgs(const Problem &problem)
     const NormalKernels *kn;
     const KurticKernels *kk;
     const ExponentKernels *ke;
+    const RoughgardenKernels *kr;
 
     printf("-------------------------------------\n");
     if((kn = dynamic_cast<const NormalKernels *>
@@ -77,17 +78,18 @@ void showArgs(const Problem &problem)
             ke->getA(),
             ke->getB()
         );
-    }else if((kk = dynamic_cast<const RoughgardenKernels *>
+    }else if((kr = dynamic_cast<const RoughgardenKernels *>
         (&problem.getKernels())))
     {
         printf(
             "Roughgarden kernels: sm = %.5lf, gamma_m = %.5lf\n"
             "                     sw = %.5lf, gamma_w = %.5lf\n",
-            kk->getSM(),
-            kk->getGM(),
-            kk->getSW(),
-            kk->getGW()
+            kr->getSM(),
+            kr->getGM(),
+            kr->getSW(),
+            kr->getGW()
         );
+    }
 
 
     printf(
@@ -144,7 +146,6 @@ int main(int argc, char **argv)
     Result answer = solver->solve(equation);
 
 #   ifdef ASCETIC
-
     printf(
         "%15.*lf\n",
         equation.accurancy(),
