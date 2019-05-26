@@ -60,8 +60,9 @@ Result AbstractSolver::solve(const Problem &p)
     }
 
     /* correcting second moment */
+    double NN = N * N;
     for(int i = 0; i < p.nodes(); i++){
-        C[i] += 1.0;
+        C[i] = NN * (C[i] + 1);
     }
 
 #   if defined(SHOUT) && !defined(ASCETIC)
