@@ -88,6 +88,15 @@ void VectorHandler::shiftLeft(double *f, int size, int shft)
 
 
 
+void VectorHandler::copy(double *dst, const double *src, int count)
+{
+    for(int i = 0; i < count; i++){
+        dst[i] = src[i];
+    }
+}
+
+
+
 double VectorHandler::getDispersion(const double *f, int size, double step,
     double origin) const
 {

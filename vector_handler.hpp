@@ -21,6 +21,9 @@ public:
     /* shift vector left (not rolling) */
     static void shiftLeft(double *f, int size, int shft);
 
+    /* copies vector to another storage */
+    static void copy(double *dst, const double *src, int count);
+
     /* store vector into the file as list of pair 'x f(x)' */
     static void storeVector(const double *f, const char *path, int size,
         double step, double origin, int accurancy);

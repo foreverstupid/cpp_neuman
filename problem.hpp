@@ -78,25 +78,19 @@ private:
 
 
 /* holds info about solution */
-class Result{
-    double _N;
+struct Result{
+    double N;
     int dim;
     int n_count;
-    const double *_C;
+    double *C;
 
-public:
-    Result(double N, const double *C, int n, int dim)
-        : _N(N), dim(dim), n_count(n)
-    {
-        _C = C;
-    }
+    Result() {}
+    Result(double N, double *C, int n, int dim)
+        : N(N), dim(dim), n_count(n), C(C)
+    {}
 
-    double N() const { return _N; }
-    const double *C() const { return _C; }
-    double getC0() const
-    {
-        return dim == 1 ? _C[0] : _C[0];
-    }
+    /* returns the second moment at the origin */
+    double getC0();
 };
 
 #endif

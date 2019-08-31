@@ -164,17 +164,17 @@ int main(int argc, char **argv)
     printf(
         "%15.*lf\n",
         equation.accurancy(),
-        answer.N()
+        answer.N
     );
 
 #   else
     printf("First moment: %.*lf\nC(0) = %.*lf\n",
-        equation.accurancy(), answer.N(), equation.accurancy(),
+        equation.accurancy(), answer.N, equation.accurancy(),
         answer.getC0());
 #   endif
 
     if(equation.path()){
-        VectorHandler::storeVector(answer.C(), equation.path(),
+        VectorHandler::storeVector(answer.C, equation.path(),
             equation.nodes(), equation.step(), equation.origin(),
             equation.accurancy());
     }

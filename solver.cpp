@@ -1,10 +1,11 @@
 #include "solver.hpp"
 
 /*====================================================================*/
-/*                      ABSTRACT SOLVER METHODS                       */
+/*                      NONLINEAR SOLVER METHODS                      */
 /*====================================================================*/
-Result AbstractSolver::solve(const Problem &p)
+Result NonlinearSolver::solve(const Problem &p)
 {
+    Result res;
     init(p);
 
 #   if defined(SHOUT) && !defined(ASCETIC)
@@ -50,7 +51,7 @@ Result AbstractSolver::solve(const Problem &p)
 
         for(int j = 0; j < p.nodes(); j++){
             C[j] = (m[j] / N - w[j] + mC[j] + p.b() - p.d() -
-                N / (p.alpha() + p.gamma()) * 
+                N / (p.alpha() + p.gamma()) *
                 (p.alpha() * (p.b() - p.d()) / N +
                 p.beta() * (wC[j] + CwC[j]) +
                 p.gamma() * ((p.b() - p.d()) / N + wC[j] + CwC[j]))) /
@@ -72,13 +73,19 @@ Result AbstractSolver::solve(const Problem &p)
     putchar('\n');
 #   endif
 
+    res.N = N;
+    res.C = new double[p.nodes()];
+    res.dim = p.dimension();
+    res.n_count = p.nodes();
+    vh.copy(res.C, C, p.nodes());
+
     clear();
-    return Result(N, C, p.nodes(), p.dimension());
+    return res;
 }
 
 
 
-void AbstractSolver::init(const Problem &p)
+void NonlinearSolver::init(const Problem &p)
 {
     getVectors(p);
     initConvolving(p);
@@ -86,29 +93,12 @@ void AbstractSolver::init(const Problem &p)
 
 
 
-void AbstractSolver::clear()
-{
-    delete[] m;
-    delete[] w;
-    delete[] mC;
-    delete[] wC;
-    delete[] CwC;
-    delete[] w_mult_C;
-
-    clearConvolving();
-}
-
-
-
-void AbstractSolver::getVectors(const Problem &p)
+void NonlinearSolver::getVectors(const Problem &p)
 {
     vh = VectorHandler(p.dimension());
 
     w = new double[p.nodes() * 2];
     m = new double[p.nodes() * 2];
-    if(C){
-        delete[] C;
-    }
     C = new double[p.nodes() * 2];
 
     mC = new double[p.nodes() * 2];
@@ -143,10 +133,25 @@ void AbstractSolver::getVectors(const Problem &p)
 
 
 
+void NonlinearSolver::clear()
+{
+    delete[] m;
+    delete[] w;
+    delete[] C;
+    delete[] mC;
+    delete[] wC;
+    delete[] CwC;
+    delete[] w_mult_C;
+
+    clearConvolving();
+}
+
+
+
 
 
 /*=====================================================================*/
-/*                          SOLVER FFT METHODS                         */
+/*                         SOLVER FFT METHODS                          */
 /*=====================================================================*/
 void SolverFFT::initConvolving(const Problem &p)
 {
