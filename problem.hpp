@@ -22,6 +22,12 @@ class Problem{
     double _beta;
     double _gamma;
 
+    bool is_linear;     /* is the problem linear */
+                        /* if true then assymetric second order closure
+                         * is using and alpha, beta and gamma parameters
+                         * are ignored
+                         */
+
     int i_count;        /* iteration count */
     int n_count;        /* nodes count */
 
@@ -54,6 +60,7 @@ public:
     double alpha() const { return _alpha; }
     double beta() const { return _beta; }
     double gamma() const { return _gamma; }
+    double isLinear() const { return is_linear; }
     int iters() const { return i_count; }
     int nodes() const { return n_count; }
     double origin() const { return orgn; }

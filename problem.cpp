@@ -15,6 +15,8 @@ Problem::Problem()
     _beta = 1.0;
     _gamma = 1.0;
 
+    is_linear = false;
+
     _R = -1.0;
     n_count = 5000;
     i_count = 1000;
@@ -49,7 +51,7 @@ int Problem::init(int argc, char **argv)
     }
 
     if(_R < 0.0){
-        _R = getR();    
+        _R = getR();
     }
 
     _step = _R / (n_count - 1);
@@ -104,6 +106,9 @@ int Problem::handleArgument(int *i, char **argv)
             break;
         case 'G':
             _gamma = str2double(argv[*i + 1]);
+            break;
+        case 'l':
+            is_linear = true;
             break;
         case 'd':
             _d = str2double(argv[*i + 1]);

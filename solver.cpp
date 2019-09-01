@@ -415,7 +415,7 @@ void SolverDHTNaive::clearConvolving()
 void SolverDHTNaive::getConvolutions(const Problem &p)
 {
     VectorHandler::multiplyVecs(C, w, w_mult_C, p.nodes());
-    
+
     for(int i = p.nodes(); i < 2 * p.nodes(); i++){
         w_mult_C[i] = C[i] = 0.0;
     }
@@ -461,4 +461,189 @@ void SolverDHTNaive::convolve(const double *Hf, const double *Hg,
 {
     VectorHandler::multiplyVecs(Hf, Hg, tmp, p.nodes());
     getHankelTransform(tmp, fg, p);
+}
+
+
+
+
+
+/*====================================================================*/
+/*                        LINEAR SOLVER METHODS                       */
+/*====================================================================*/
+void LinearSolver::solveTwin(const Problem &p, double N)
+{
+    for(int i = 0; i < p.nodes() * 2; i++){
+        C[i] = w[i];
+    }
+
+    for(int i = 0; i < p.iters(); i++){
+#       ifndef ASCETIC
+        while(bar_chars < (double)BAR_WIDTH * i / p.iters() / 3){
+            putchar(BAR_CHAR);
+            bar_chars++;
+        }
+        fflush(stdout);
+#       endif
+
+#       ifdef DEBUG
+        VectorHandler::storeVector(C, "C.plt", p.nodes() * 2,
+            p.step(), p.origin(), p.accurancy());
+        VectorHandler::storeVector(mC, "mC.plt", p.nodes() * 2,
+            p.step(), p.origin(), p.accurancy());
+#       endif
+
+        convolve(p);
+        for(int j = 0; j < p.nodes(); j++){
+            C[j] = (p.b()*mC[j] + m[j]*N + p.s()*(m[j] - w[j])) /
+                (p.b() + p.s()*w[j]);
+        }
+    }
+}
+
+
+
+Result LinearSolver::solve(const Problem &p)
+{
+    Result res;
+    init(p);
+
+#   ifndef ASCETIC
+    printf("Progress: ");
+    bar_chars = 0;
+    fflush(stdout);
+#   endif
+
+#   ifdef DEBUG
+    VectorHandler::storeVector(m, "m.plt", p.nodes() * 2, p.step(),
+        p.origin(), p.accurancy());
+    VectorHandler::storeVector(w, "w.plt", p.nodes() * 2, p.step(),
+        p.origin(), p.accurancy());
+#   endif
+
+    double N;
+
+    solveTwin(p, 0);
+    N = p.s() * vh.getDot(w, C, p.nodes(), p.step(), p.origin());
+
+    solveTwin(p, 1);
+    N = N / (1 + N -
+        p.s() * vh.getDot(w, C, p.nodes(), p.step(), p.origin()));
+
+    solveTwin(p, N);
+
+#   ifndef ASCETIC
+    for(; bar_chars < BAR_WIDTH; bar_chars++){
+        putchar('#');
+    }
+    putchar('\n');
+#   endif
+
+    res.N = N;
+    res.C = new double[p.nodes()];
+    res.dim = p.dimension();
+    res.n_count = p.nodes();
+    vh.copy(res.C, C, p.nodes());
+
+    clear();
+    return res;
+}
+
+
+
+void LinearSolver::init(const Problem &p)
+{
+    vh = VectorHandler(p.dimension());
+
+    m = new double[2 * p.nodes()];
+    w = new double[p.nodes()];
+    C = new double[2 * p.nodes()];
+    mC = new double[2 * p.nodes()];
+
+    double x = p.origin();
+
+    for(int i = 0; i < p.nodes(); i++){
+        m[i] = p.getKernels().m(x);
+        w[i] = p.getKernels().w(x);
+        x += p.step();
+    }
+
+    double nm = vh.getIntNorm(m, p.nodes(), p.step(), p.origin());
+    double nw = vh.getIntNorm(w, p.nodes(), p.step(), p.origin());
+
+#   ifdef DEBUG
+    printf("nm = %15.5lf\nnw = %15.5lf\n", nm, nw);
+#   endif
+
+    for(int i = 0; i < p.nodes(); i++){
+        m[i] *= p.b() / nm;
+        w[i] *= p.s() / nw;
+    }
+
+    for(int i = p.nodes(); i < 2 * p.nodes(); i++){
+        m[i] = C[i] = mC[i] = 0.0;
+    }
+
+    initConvolving(p);
+}
+
+
+
+void LinearSolver::initConvolving(const Problem &p)
+{
+    int n = p.nodes();
+
+    fft_m = fftw_alloc_complex(n + 1);
+    fft_C = fftw_alloc_complex(n + 1);
+
+    forward_C = fftw_plan_dft_r2c_1d(n * 2, C, fft_C,
+        FFTW_ESTIMATE);
+    backward_mC = fftw_plan_dft_c2r_1d(n * 2, fft_C, mC,
+        FFTW_ESTIMATE);
+
+    fftw_plan m_plan = fftw_plan_dft_r2c_1d(p.nodes() * 2, m, fft_m,
+        FFTW_ESTIMATE);
+    fftw_execute(m_plan);
+    fftw_destroy_plan(m_plan);
+}
+
+
+
+void LinearSolver::clear()
+{
+    fftw_free(fft_m);
+    fftw_free(fft_C);
+    fftw_destroy_plan(forward_C);
+    fftw_destroy_plan(backward_mC);
+    fftw_cleanup();
+
+    delete[] m;
+    delete[] w;
+    delete[] C;
+    delete[] mC;
+}
+
+
+
+void LinearSolver::convolve(const Problem &p)
+{
+    fftw_execute(forward_C);
+
+    double re;
+    double im;
+
+    for(int i = 0; i < p.nodes() + 1; i++){
+        re = fft_C[i][0] * fft_m[i][0] - fft_C[i][1] * fft_m[i][1];
+        im = fft_C[i][0] * fft_m[i][1] + fft_C[i][1] * fft_m[i][0];
+
+        fft_C[i][0] = re;
+        fft_C[i][1] = im;
+    }
+
+    fftw_execute(backward_mC);
+
+    for(int i = 0; i < p.nodes() * 2; i++){
+        mC[i] *= p.step() / (p.nodes() * 2);
+    }
+
+    VectorHandler::shiftLeft(mC, p.nodes(), p.nodes() / 2);
 }

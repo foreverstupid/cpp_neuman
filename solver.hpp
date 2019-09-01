@@ -82,6 +82,10 @@ protected:
 
 
 
+/*
+ * solves nonlinear equilibrium problem using fast Fourier transform
+ * for calculating convolutions
+ */
 class SolverFFT : public NonlinearSolver{
     fftw_complex *tmp_C;    /* variables for holding tmp results of */
     fftw_complex *tmp_wC;   /* convolutions */
@@ -95,7 +99,6 @@ class SolverFFT : public NonlinearSolver{
     fftw_plan backward_mC;
     fftw_plan backward_wC;
     fftw_plan backward_CwC;
-
 
     void initConvolving(const Problem &p);
     void clearConvolving();
@@ -111,6 +114,10 @@ class SolverFFT : public NonlinearSolver{
 
 
 
+/*
+ * solves nonlinear equilibrium problem using discrete Hankel
+ * transform by matrix for calculating convolutions
+ */
 class SolverDHT : public NonlinearSolver{
     double *DHTMatrix;      /* matrix for hankel transform */
 
@@ -135,6 +142,10 @@ class SolverDHT : public NonlinearSolver{
 
 
 
+/*
+ * solves nonlinear equilibrium problem using discrete Hankel
+ * transform in naive form for calculating convolutions
+ */
 class SolverDHTNaive : public NonlinearSolver{
     double *Hm;             /* kernel Hankel transforms */
     double *Hw;
@@ -154,6 +165,41 @@ class SolverDHTNaive : public NonlinearSolver{
     /* make convolving using Hankel images of functions */
     void convolve(const double *Hf, const double *Hg, double *fg,
         const Problem &p);
+};
+
+
+
+/*  solves linear equilibrium problem using Neuman method */
+class LinearSolver : public AbstractSolver{
+protected:
+    VectorHandler vh;
+
+    fftw_complex *fft_C;    /* fft of the second moment */
+    fftw_complex *fft_m;    /* fft of birth kernel */
+
+    fftw_plan forward_C;    /* plans for fftw3 */
+    fftw_plan backward_mC;
+
+    double *m;              /* samples of birth kernel */
+    double *w;              /* samples of death kernel */
+    double *C;              /* samples of the second moment */
+    double *mC;             /* samples of [m * C] */
+
+public:
+    Result solve(const Problem &p);
+
+protected:
+    void init(const Problem &p);
+    void clear();
+
+    /* inits convolving */
+    void initConvolving(const Problem &p);
+
+    /* convolves birth kernel with the second moment */
+    void convolve(const Problem &p);
+
+    /* solves twin equation with the given parameter */
+    void solveTwin(const Problem &p, double N);
 };
 
 #endif

@@ -33,6 +33,11 @@
 "-A - alpha parameter of second order closure\n"\
 "-B - beta parameter of second order closure\n"\
 "-G - gamma parameter of second order closure\n"\
+"-l - if specified then second order asymetric closure is used and\n"\
+"     equation became linear (-A, -B and -G parameters are ignored).\n"\
+"     The value of this parameter specifies solving method:\n"\
+"         neuman - iterative method using three solutions of twin\n"\
+"                  equilibrium equation\n"\
 "-d - environment death parameter\n"\
 "-b - kind birth parameter\n"\
 "-s - kind death parameter\n"\
@@ -154,7 +159,11 @@ int main(int argc, char **argv)
 
     AbstractSolver *solver;
     if(equation.dimension() == 1 || equation.dimension() == 3){
-        solver = new SolverFFT();
+        if(equation.isLinear()){
+            solver = new LinearSolver();
+        }else{
+            solver = new SolverFFT();
+        }
     }else{
         solver = new SolverDHTNaive();
     }
