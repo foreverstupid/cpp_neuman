@@ -172,6 +172,10 @@ class SolverDHTNaive : public NonlinearSolver{
 /*  solves linear equilibrium problem using Neuman method */
 class LinearSolver : public AbstractSolver{
 protected:
+#   ifndef ASCETIC
+    int shift;              /* for progress bar */
+#   endif
+    
     VectorHandler vh;
 
     fftw_complex *fft_C;    /* fft of the second moment */

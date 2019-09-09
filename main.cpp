@@ -56,6 +56,7 @@ void showArgs(const Problem &problem)
     const KurticKernels *kk;
     const ExponentKernels *ke;
     const RoughgardenKernels *kr;
+    const ExponentPolynomialKernels *kep;
 
     printf("-------------------------------------\n");
     if((kn = dynamic_cast<const NormalKernels *>
@@ -96,16 +97,16 @@ void showArgs(const Problem &problem)
             kr->getSW(),
             kr->getGW()
         );
-    }else if((kr = dynamic_cast<const ExponentPolynomialKernels *>
+    }else if((kep = dynamic_cast<const ExponentPolynomialKernels *>
         (&problem.getKernels())))
     {
         printf(
             "Exponent polynomial kernels: sm = %.5lf, gamma_m = %.5lf\n"
             "                             sw = %.5lf, gamma_w = %.5lf\n",
-            kr->getAM(),
-            kr->getBM(),
-            kr->getAW(),
-            kr->getBW()
+            kep->getAM(),
+            kep->getBM(),
+            kep->getAW(),
+            kep->getBW()
         );
     }
 

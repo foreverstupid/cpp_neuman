@@ -1,5 +1,4 @@
 CC=g++
-CUDACC=nvcc
 CFLAGS=-Wall -O3 -Ofast -fno-exceptions -DASCETIC
 LIBS=-lm -lfftw3
 
@@ -11,7 +10,7 @@ NAME=neuman
 %.o: %.cpp %.hpp
 	$(CC) $(CFLAGS) $(INCDIR) -c $< -o $@
 
-$(NAME): main.cpp $(OBJ)# cuda_vec.o
+$(NAME): main.cpp $(OBJ)
 	$(CC) $(CFLAGS) $(INCDIR) $(LDFLAGS) $^ $(LIBS) -o $@
 
 clean:

@@ -472,13 +472,17 @@ void SolverDHTNaive::convolve(const double *Hf, const double *Hg,
 /*====================================================================*/
 void LinearSolver::solveTwin(const Problem &p, double N)
 {
-    for(int i = 0; i < p.nodes() * 2; i++){
+    for(int i = 0; i < p.nodes(); i++){
         C[i] = w[i];
+    }
+
+    for (int i = p.nodes(); i < 2 * p.nodes(); i++){
+        C[i] = 0.0;
     }
 
     for(int i = 0; i < p.iters(); i++){
 #       ifndef ASCETIC
-        while(bar_chars < (double)BAR_WIDTH * i / p.iters() / 3){
+        while(bar_chars < shift + (double)BAR_WIDTH * i / p.iters() / 3){
             putchar(BAR_CHAR);
             bar_chars++;
         }
@@ -494,7 +498,7 @@ void LinearSolver::solveTwin(const Problem &p, double N)
 
         convolve(p);
         for(int j = 0; j < p.nodes(); j++){
-            C[j] = (p.b()*mC[j] + m[j]*N + p.s()*(m[j] - w[j])) /
+            C[j] = (p.b()*mC[j] + m[j]*N - p.s()*(m[j] + w[j])) /
                 (p.b() + p.s()*w[j]);
         }
     }
@@ -522,13 +526,22 @@ Result LinearSolver::solve(const Problem &p)
 
     double N;
 
+#   ifndef ASCETIC
+    shift = 0;
+#   endif
     solveTwin(p, 0);
     N = p.s() * vh.getDot(w, C, p.nodes(), p.step(), p.origin());
 
+#   ifndef ASCETIC
+    shift = (double)BAR_WIDTH / 3;
+#   endif
     solveTwin(p, 1);
-    N = N / (1 + N -
+    N = N / (1 -
         p.s() * vh.getDot(w, C, p.nodes(), p.step(), p.origin()));
 
+#   ifndef ASCETIC
+    shift = 2 * (double)BAR_WIDTH / 3;
+#   endif
     solveTwin(p, N);
 
 #   ifndef ASCETIC
@@ -538,11 +551,16 @@ Result LinearSolver::solve(const Problem &p)
     putchar('\n');
 #   endif
 
-    res.N = N;
     res.C = new double[p.nodes()];
     res.dim = p.dimension();
     res.n_count = p.nodes();
     vh.copy(res.C, C, p.nodes());
+
+    for(int i = 0; i < p.nodes(); i++){
+        res.C[i] += 1.0;
+    }
+    res.N = (p.b() - p.d()) /
+        (p.s() * vh.getDot(res.C, w, p.nodes(), p.step(), p.origin()));
 
     clear();
     return res;
@@ -575,8 +593,8 @@ void LinearSolver::init(const Problem &p)
 #   endif
 
     for(int i = 0; i < p.nodes(); i++){
-        m[i] *= p.b() / nm;
-        w[i] *= p.s() / nw;
+        m[i] /= nm;
+        w[i] /= nw;
     }
 
     for(int i = p.nodes(); i < 2 * p.nodes(); i++){

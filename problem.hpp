@@ -97,7 +97,10 @@ struct Result{
     {}
 
     /* returns the second moment at the origin */
-    double getC0();
+    double getC0() const
+    {
+        return C[0];
+    }
 };
 
 #endif
