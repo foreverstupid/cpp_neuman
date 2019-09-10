@@ -665,3 +665,79 @@ void LinearSolver::convolve(const Problem &p)
 
     VectorHandler::shiftLeft(mC, p.nodes(), p.nodes() / 2);
 }
+
+
+
+
+/*===================================================================*/
+/*                   NYSTROM LINEAR SOLVER METHODS                   */
+/*===================================================================*/
+void NystromSolver::init(const Problem &p)
+{
+    A.resize(p.nodes());
+    vh = VectorHandler(p.dimension());
+
+    double x = p.origin();
+    double y;
+
+    for(int i = 0; i < p.nodes(); i++){
+        y = p.origin();
+
+        for(int j = 0; j < p.nodes(); j++){
+            A(i, j) =
+                vh.weight(j, p.nodes(), p.step()) *
+                kernel(p, x, y);
+            y += p.step();
+
+            if(i == j){
+                A(i, j) -= 1.0;
+            }
+        }
+
+        x += p.step();
+    }
+
+    f = new double[p.nodes()];
+    w = new double[p.nodes()];
+    double *m = new double[p.nodes()];
+    x = p.origin();
+
+    for(int i = 0; i < p.nodes(); i++){
+        f[i] = rightPart(p, x);
+        w[i] = p.getKernels().w(x);
+        m[i] = p.getKernels().m(x);
+        x += p.step();
+    }
+
+    nm = vh.getIntNorm(m, p.nodes(), p.step(), p.origin());
+    nw = vh.getIntNorm(w, p.nodes(), p.step(), p.origin());
+    for(int i = 0; i < p.nodes(); i++){
+        w[i] /= nw;
+    }
+
+    delete[] m;
+}
+
+
+
+Result NystromSolver::solve(const Problem &p)
+{
+    Result res;
+    init(p);
+
+    res.dim = p.dimension();
+    res.C = solveGauss(A, f);
+    res.N = nw * (p.b() - p.d()) /
+        (p.s() * vh.getDot(res.C, w, p.nodes(), p.step(), p.origin()));
+
+    clear();
+    return res;
+}
+
+
+
+void NystromSolver::clear()
+{
+    delete[] w;
+    delete[] f;
+}

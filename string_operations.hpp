@@ -12,4 +12,6 @@ int str2int(const char *str);
 
 double str2double(const char *str);
 
+bool equals(const char *str1, const char *str2);
+
 #endif

@@ -33,11 +33,14 @@
 "-A - alpha parameter of second order closure\n"\
 "-B - beta parameter of second order closure\n"\
 "-G - gamma parameter of second order closure\n"\
-"-l - if specified then second order asymetric closure is used and\n"\
-"     equation became linear (-A, -B and -G parameters are ignored).\n"\
-"     The value of this parameter specifies solving method:\n"\
-"         neuman - iterative method using three solutions of twin\n"\
-"                  equilibrium equation\n"\
+"-m - equation solving method. Can be one of the following types:\n"\
+"         neuman - Neuman method for nonlinear case\n"\
+"         lneuman - Neuman method for linear case (LINEAR)\n"\
+"         nystrom - Nystrom method (LINEAR)\n"\
+"     Note that using method marked as LINEAR leads to ignoring\n"\
+"     A, B and G parameters and using the asymmetric second order\n"\
+"     closure (A = 1, B = G = 0). That makes equilibrium equation\n"\
+"     linear one.\n"\
 "-d - environment death parameter\n"\
 "-b - kind birth parameter\n"\
 "-s - kind death parameter\n"\
@@ -112,11 +115,21 @@ void showArgs(const Problem &problem)
 
 
 
+    const char *methodName;
+    if(problem.method() == Problem::nonlinear_neuman){
+        methodName = "neuman nonlinear";
+    }else if(problem.method() == Problem::linear_neuman){
+        methodName = "neuman linear";
+    }else if(problem.method() == Problem::nystrom){
+        methodName = "nystrom";
+    }
+
     printf(
         "R = %10.5lf\nn_count = %d\ni_count = %d\nb = %10.5lf\n"
         "s = %10.5lf\nd = %10.5lf\nalpha = %10.5lf\nbeta = %10.5lf\n"
         "gamma = %10.5lf\naccurancy = %d\n"
-        "step = %10.5lf\ndimension = %d\n",
+        "step = %10.5lf\ndimension = %d\n"
+        "method: %s\n",
         problem.R(),
         problem.nodes(),
         problem.iters(),
@@ -128,7 +141,8 @@ void showArgs(const Problem &problem)
         problem.gamma(),
         problem.accurancy(),
         problem.step(),
-        problem.dimension()
+        problem.dimension(),
+        methodName
     );
     if(problem.path()){
         printf("path = '%s'\n", problem.path());
@@ -160,8 +174,10 @@ int main(int argc, char **argv)
 
     AbstractSolver *solver;
     if(equation.dimension() == 1 || equation.dimension() == 3){
-        if(equation.isLinear()){
+        if(equation.method() == Problem::linear_neuman){
             solver = new LinearSolver();
+        }else if(equation.method() == Problem::nystrom){
+            solver = new NystromSolver();
         }else{
             solver = new SolverFFT();
         }

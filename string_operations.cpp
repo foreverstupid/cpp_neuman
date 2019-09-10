@@ -84,3 +84,17 @@ double str2double(const char *str)
 
     return res * sign;
 }
+
+
+
+bool equals(const char *str1, const char *str2)
+{
+    int i;
+    for(i = 0; str1[i]; i++){
+        if(str1[i] != str2[i]){
+            return false;
+        }
+    }
+
+    return str2[i] == 0;
+}

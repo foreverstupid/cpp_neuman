@@ -1,6 +1,6 @@
 #include "matrix_solve.hpp"
 
-Matrix::Matrix(int size)
+void Matrix::create(int size)
 {
     this->size = size;
     data = new double *[size];
@@ -12,13 +12,16 @@ Matrix::Matrix(int size)
 
 
 
-Matrix::~Matrix()
+void Matrix::clear()
 {
-    for(int i = 0; i < size; i++){
-        delete[] data[i];
-    }
+    if(data)
+    {
+        for(int i = 0; i < size; i++){
+            delete[] data[i];
+        }
 
-    delete[] data;
+        delete[] data;
+    }
 }
 
 
@@ -97,7 +100,9 @@ double *solveGauss(Matrix &A, double *f)
         if(m_row != i){
             A.swapRows(i, m_row);
         }
-
+#       ifndef DASCETIC
+        printf("%d/%d\n", i, A.getSize());
+#       endif
         gaussStep(A, f, i);
     }
 

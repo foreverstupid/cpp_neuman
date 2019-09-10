@@ -10,6 +10,20 @@
 
 /* holds all input info about current problem */
 class Problem{
+public:
+    /*
+     * Solving methods for equation resolve.
+     * If one of linear methods is used then A, B and G parameters are
+     * ignored and asymmetric second order closure is used making
+     * the problem linear.
+     */
+    enum Method{
+        nonlinear_neuman,   /* Neuman method for nonlinear equation */
+        linear_neuman,      /* Neuman method for linear equation */
+        nystrom             /* Nystrom method for linear equation */
+    };
+
+private:
     static const char *default_path;    /* default path for output file */
 
     Kernels *kernels;   /* birth and death parameters */
@@ -22,11 +36,7 @@ class Problem{
     double _beta;
     double _gamma;
 
-    bool is_linear;     /* is the problem linear */
-                        /* if true then assymetric second order closure
-                         * is using and alpha, beta and gamma parameters
-                         * are ignored
-                         */
+    Method _method;     /* equation solving method */
 
     int i_count;        /* iteration count */
     int n_count;        /* nodes count */
@@ -41,6 +51,7 @@ class Problem{
                         /* if _path = 0 output file won't be created */
 
 public:
+    /* comand line arguments parsing error */
     enum{
         success, help, unknown_arg_error, empty_arg_error, dim_error,
         expected_arg_error, kernel_params_error, kernel_type_error
@@ -60,7 +71,7 @@ public:
     double alpha() const { return _alpha; }
     double beta() const { return _beta; }
     double gamma() const { return _gamma; }
-    double isLinear() const { return is_linear; }
+    Method method() const { return _method; }
     int iters() const { return i_count; }
     int nodes() const { return n_count; }
     double origin() const { return orgn; }

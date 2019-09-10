@@ -5,6 +5,7 @@
 #include <fftw3.h>
 #include "problem.hpp"
 #include "vector_handler.hpp"
+#include "matrix_solve.hpp"
 #ifdef DEBUG
 #include <stdio.h>
 #endif
@@ -29,6 +30,7 @@ protected:
 #   if defined(SHOUT) && !defined(ASCETIC)
     int bar_chars;          /* for progress bar */
 #   endif
+    VectorHandler vh;       /* object for vector operations */
 
 public:
     virtual Result solve(const Problem &p) = 0;
@@ -47,8 +49,6 @@ protected:
 /* solves nonlinear equilibrium problem */
 class NonlinearSolver : public AbstractSolver{
 protected:
-    VectorHandler vh;       /* object for vector operations */
-
     double N;               /* first moment */
     double *C;              /* second moment samples */
 
@@ -175,8 +175,6 @@ protected:
 #   ifndef ASCETIC
     int shift;              /* for progress bar */
 #   endif
-    
-    VectorHandler vh;
 
     fftw_complex *fft_C;    /* fft of the second moment */
     fftw_complex *fft_m;    /* fft of birth kernel */
@@ -204,6 +202,43 @@ protected:
 
     /* solves twin equation with the given parameter */
     void solveTwin(const Problem &p, double N);
+};
+
+
+
+/*
+ * linear solver that uses Nystrom method (non-iterative)
+ */
+class NystromSolver : public AbstractSolver{
+    Matrix A;       /* matrix of linear system approximation */
+    double *f;      /* right parts approximation */
+
+    double *w;      /* death kernel samples */
+    double nm;      /* birth kernel norm */
+    double nw;      /* death kernel norm */
+
+public:
+    Result solve(const Problem &p);
+
+protected:
+    void init(const Problem &p);
+    void clear();
+
+    /* equilibrium operator kernel in linear case */
+    double kernel(const Problem &p, double x, double y)
+    {
+        return
+            (p.b() * p.getKernels().m(x - y) +
+             p.s() * p.getKernels().m(x) * p.getKernels().w(y) / nw) /
+            (p.b() + p.s() / nw * p.getKernels().w(x)) / nm;
+    }
+
+    /* right part of the equation */
+    double rightPart(const Problem &p, double x)
+    {
+        return 1.0 - (p.b() + p.s() * p.getKernels().m(x)) /
+            (p.b() + p.s() * p.getKernels().w(x));
+    }
 };
 
 #endif

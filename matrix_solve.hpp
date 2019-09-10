@@ -3,6 +3,9 @@
 
 #include <math.h>
 #include <stdlib.h>
+#ifndef DASCETIC
+#include <stdio.h>
+#endif
 
 
 
@@ -15,8 +18,9 @@ class Matrix{
     int size;
 
 public:
-    Matrix(int size);
-    ~Matrix();
+    Matrix(){ data = 0; }
+    Matrix(int size){ create(size); }
+    ~Matrix(){ clear(); }
 
     double &operator()(int i, int j){ return data[i][j]; }
     const double &operator()(int i, int j) const { return data[i][j]; }
@@ -37,15 +41,34 @@ public:
      * column among the last n rows.
      */
     int findMaxAbsElementRow(int n);
+
+    /*
+     * Inits a matrix by a new size (erases all stored data).
+     */
+    void resize(int size){ clear(); create(size); }
+
+private:
+    Matrix(const Matrix &A);
+    void operator=(const Matrix &A);
+
+    /*
+     * Disposes matrix data.
+     */
+    void clear();
+
+    /*
+     * Creates a new data storage of a given size.
+     */
+    void create(int size);
 };
 
 
 
 /*
  * Solves linear equation system with the square matrix using Gauss
- * method: f = Ax.
- * Notabene: matrix is changed during solving.
+ * method: Ax = f.
+ * Notabene: matrix and right part are changed during solving.
  */
-double* solveGauss(Matrix A, const double *f);
+double* solveGauss(Matrix &A, double *f);
 
 #endif

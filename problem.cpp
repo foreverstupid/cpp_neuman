@@ -15,7 +15,7 @@ Problem::Problem()
     _beta = 1.0;
     _gamma = 1.0;
 
-    is_linear = false;
+    _method = nonlinear_neuman;
 
     _R = -1.0;
     n_count = 5000;
@@ -54,8 +54,13 @@ int Problem::init(int argc, char **argv)
         _R = getR();
     }
 
-    _step = _R / (n_count - 1);
-    orgn = 0.0;
+    if(_method == nystrom){
+        _step = 2 * _R / (n_count - 1);
+        orgn = -_R;
+    }else{
+        _step = _R / (n_count - 1);
+        orgn = 0.0;
+    }
 
     return success;
 }
@@ -107,8 +112,18 @@ int Problem::handleArgument(int *i, char **argv)
         case 'G':
             _gamma = str2double(argv[*i + 1]);
             break;
-        case 'l':
-            is_linear = true;
+        case 'm':
+            if(equals(argv[*i + 1], "lneuman")){
+                _method = linear_neuman;
+            }else if(equals(argv[*i + 1], "nystrom")){
+                _method = nystrom;
+            }else{
+                _method = nonlinear_neuman;
+                if(!equals(argv[*i + 1], "neuman")){
+                    fprintf(stderr, "^^^ Unkown solving method. "
+                        "Nonlinear Neuman method is used.\n");
+                }
+            }
             break;
         case 'd':
             _d = str2double(argv[*i + 1]);
