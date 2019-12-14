@@ -7,9 +7,9 @@
 
 #define REFERENCE_MESSAGE "EQUILIBRIUM EQUATION SOLVER\n\n"\
 "This program is used for solving an integral equation that appears\n"\
-"in the Ulf Dieckmann's biological model in a one kind case. This\n"\
-"equation describes space moments dynamics. The program uses general\n"\
-"second order closure of the third moment:\n\n"\
+"in the Ulf Dieckmann and Richard Law's biological model of one species.\n"\
+"This equation describes the second spatial moment in the equilibrium state.\n"
+"The program uses the general second order closure of the third moment:\n\n"\
 "              1   C(x)C(y)    C(x)C(y-x)    C(y)C(y-x)\n"\
 "    T(x, y) =---(A-------- + B---------- + G---------- - BN^3)\n"\
 "             A+B     N            N             N\n\n"\
@@ -34,23 +34,25 @@
 "-B - beta parameter of second order closure\n"\
 "-G - gamma parameter of second order closure\n"\
 "-m - equation solving method. Can be one of the following types:\n"\
-"         neuman - Neuman method for nonlinear case\n"\
+"         neuman - Neuman method for nonlinear case (default value)\n"\
 "         lneuman - Neuman method for linear case (LINEAR)\n"\
 "         nystrom - Nystrom method (LINEAR)\n"\
 "     Note that using method marked as LINEAR leads to ignoring\n"\
 "     A, B and G parameters and using the asymmetric second order\n"\
 "     closure (A = 1, B = G = 0). That makes equilibrium equation\n"\
-"     linear one.\n"\
-"-d - environment death parameter\n"\
-"-b - kind birth parameter\n"\
-"-s - kind death parameter\n"\
+"     linear one. Moreover LINEAR methods are used only in the 1D or 3D\n"\
+"     case.\n"\
+"-d - environment death rating\n"\
+"-b - species birth rating\n"\
+"-s - species death rating\n"\
 "-r - size of area (give 'n' to use autocomputed size)\n"\
-"-D - dimension of space\n"\
+"-D - dimensionality of space\n"\
 "-i - iteration count\n"\
 "-n - grid node count\n"\
-"-p - path to store data (give 'n' to not create a data file)\n"\
+"-p - path to store data (give 'n' to don't create a data file)\n"\
 "-e - accurancy in signs after point\n"\
-"-h - show this help\n"
+"-h - show this help\n\n"\
+"See more information about this model in the papers."
 
 #ifdef DEBUG
 void showArgs(const Problem &problem)
