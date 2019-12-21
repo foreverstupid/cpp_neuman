@@ -3,7 +3,7 @@ CFLAGS=-Wall -O3 -Ofast -fno-exceptions -DASCETIC
 LIBS=-lm -lfftw3
 
 SRC=solver.cpp problem.cpp kernels.cpp vector_handler.cpp \
-    string_operations.cpp
+    string_operations.cpp matrix_solve.cpp
 OBJ=$(SRC:%.cpp=%.o)
 NAME=neuman
 

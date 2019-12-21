@@ -8,7 +8,7 @@
 #define REFERENCE_MESSAGE "EQUILIBRIUM EQUATION SOLVER\n\n"\
 "This program is used for solving an integral equation that appears\n"\
 "in the Ulf Dieckmann and Richard Law's biological model of one species.\n"\
-"This equation describes the second spatial moment in the equilibrium state.\n"
+"This equation describes the second spatial moment in the equilibrium state.\n"\
 "The program uses the general second order closure of the third moment:\n\n"\
 "              1   C(x)C(y)    C(x)C(y-x)    C(y)C(y-x)\n"\
 "    T(x, y) =---(A-------- + B---------- + G---------- - BN^3)\n"\
