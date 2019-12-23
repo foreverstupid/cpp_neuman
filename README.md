@@ -83,7 +83,7 @@ Default kernels are the equal kurtic kernels with the parameters `1.0 1.0`.
 
 The program can use not only nonlinear Neuman's method for solving the equation.
 You can change the method, but **only in the 1D or 3D case**. Note, that using
-linear methods, the program automatically sets the arguments `-A 0 -B 1 -G 1`,
+linear methods, the program automatically sets the arguments `-A 1 -B 0 -G 0`,
 making the equation linear. The user-specified values of these arguments are
 ignored. Using linear methods in 2D case is ignoring.
 
