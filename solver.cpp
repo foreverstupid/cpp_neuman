@@ -20,10 +20,10 @@ Result NonlinearSolver::solve(const Problem &p)
     VectorHandler::storeVector(w, "w.plt", p.nodes() * 2, p.step(),
         p.origin(), p.accurancy());
 #   endif
-
+    double Y = 0.0;
     for(int i = 0; i < p.iters(); i++){
-        N = (p.b() - p.d()) /
-            (vh.getDot(C, w, p.nodes(), p.step(), p.origin()) + p.s());
+        Y = vh.getDot(C, w, p.nodes(), p.step(), p.origin()) + p.s();
+        N = (p.b() - p.d()) / Y;
         getConvolutions(p);
 
 #       ifndef ASCETIC
@@ -50,13 +50,21 @@ Result NonlinearSolver::solve(const Problem &p)
 #       endif
 
         for(int j = 0; j < p.nodes(); j++){
-            C[j] = (m[j] / N - w[j] + mC[j] + p.b() - p.d() -
-                N / (p.alpha() + p.gamma()) *
-                (p.alpha() * (p.b() - p.d()) / N +
-                p.beta() * (wC[j] + CwC[j]) +
-                p.gamma() * ((p.b() - p.d()) / N + wC[j] + CwC[j]))) /
-                (p.d() + w[j] + N / (p.alpha() + p.gamma()) *
-                p.alpha() * (p.b() - p.d()) / N  + p.beta() * p.s());
+            C[j] =
+                (
+                    m[j] / N - w[j] + mC[j] + p.b() - p.d() -
+                    N / (p.alpha() + p.gamma()) *
+                    (
+                        p.alpha() * Y +
+                        p.beta() * (wC[j] + CwC[j]) +
+                        p.gamma() * (Y + wC[j] + CwC[j])
+                    )
+                ) /
+                (
+                    p.d() + w[j] +
+                    p.alpha() * (p.b() - p.d()) / (p.alpha() + p.gamma()) +
+                    p.beta() * p.s()
+                );
         }
     }
 
