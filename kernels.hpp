@@ -2,16 +2,21 @@
 #define KERNELS_CLASS_HPP
 
 #include <math.h>
+#include <stdio.h>
 
 
 
 /* abstract class for incapsulate birth and death kernels */
 class Kernels{
+protected:
+    static double eps;
+
 public:
     virtual ~Kernels() {}
 
     virtual double m(double x) const = 0;
     virtual double w(double x) const = 0;
+    virtual double getR() const;
 };
 
 
@@ -71,6 +76,8 @@ public:
         double arg = x / sigma_w;
         return gauss_coeff / sigma_w * exp(-0.5 * arg * arg);
     }
+
+    double getR() const;
 };
 
 

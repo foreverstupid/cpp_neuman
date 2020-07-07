@@ -90,7 +90,6 @@ public:
 private:
     int handleArgument(int *i, char **argv);
     int setKernels(int *i, char **argv);
-    double getR();
 };
 
 

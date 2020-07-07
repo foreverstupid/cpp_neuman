@@ -51,7 +51,7 @@ int Problem::init(int argc, char **argv)
     }
 
     if(_R < 0.0){
-        _R = getR();
+        _R = kernels->getR();
     }
 
     if(_method == nystrom){
@@ -210,19 +210,4 @@ int Problem::setKernels(int *i, char **argv)
 
     *i += 1;
     return success;
-}
-
-
-
-double Problem::getR()
-{
-    double eps = 1e-9;
-    double step = 1e-5;
-    double x = 0.0;
-
-    while(fabs(kernels->m(x)) > eps || fabs(kernels->w(x)) > eps){
-        x += step;
-    }
-
-    return x;
 }
