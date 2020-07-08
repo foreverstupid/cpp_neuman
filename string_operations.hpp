@@ -1,6 +1,8 @@
 #ifndef STRING_OPERATIONS_MODULE_HPP
 #define STRING_OPERATIONS_MODULE_HPP
 
+#include <stdio.h>
+
 inline bool isDigit(char ch)
 {
     return ch >= '0' && ch <= '9';
