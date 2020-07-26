@@ -402,6 +402,21 @@ void SolverDHTNaive::initConvolving(const Problem &p)
     HC = new double[2 * p.nodes()];
     Hw_mult_C = new double[p.nodes()];
     tmp = new double[2 * p.nodes()];
+    J = new double[p.nodes() * p.nodes() / 8 + p.nodes() / 4 + 1];
+
+    double x;
+    double y = 0.0;
+    int idx;
+    for(int i = 0; i < p.nodes() / 2; i++){
+        x = 0.0;
+        for(int j = i; j < p.nodes() / 2; j++){
+            idx = (p.nodes() - i + 1) * i / 2 + j - i;
+            J[idx] = j0(x * y);
+            x += p.step();
+        }
+
+        y += p.step();
+    }
 
     getHankelTransform(m, Hm, p);
     getHankelTransform(w, Hw, p);
@@ -416,6 +431,7 @@ void SolverDHTNaive::clearConvolving()
     delete[] HC;
     delete[] Hw_mult_C;
     delete[] tmp;
+    delete[] J;
 }
 
 
@@ -441,24 +457,24 @@ void SolverDHTNaive::getHankelTransform(const double *f, double *Hf,
     const Problem &p)
 {
     double x;
-    double y = 0.0;
+    int idx;
 
-    for(int i = p.nodes() / 2; i < p.nodes(); i++){
+    for(int i = 0; i < p.nodes() / 2; i++){
         x = 0.0;
-        for(int j = p.nodes() / 2; j < p.nodes(); j++){
-            tmp[j] = j0(x * y);
+        Hf[i + p.nodes() / 2] = 0.0;
+        for(int j = 0; j < p.nodes() / 2; j++){
+            idx =
+                j >= i
+                ? (p.nodes() - i + 1) * i / 2 + j - i
+                : (p.nodes() - j + 1) * j / 2 + i - j;
+
+            Hf[i + p.nodes() / 2] += J[idx] * x * f[j + p.nodes() / 2] *
+                vh.weight(j, p.nodes() / 2, p.step());
+
             x += p.step();
         }
 
-        Hf[p.nodes() - i - 1] = Hf[i] = vh.getDot(
-            f + p.nodes() / 2,
-            tmp,
-            p.nodes() / 2,
-            p.step(),
-            p.origin()
-        );
-
-        y += p.step();
+        Hf[p.nodes() / 2 - i - 1] = Hf[i + p.nodes() / 2];
     }
 }
 

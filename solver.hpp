@@ -153,7 +153,9 @@ class SolverDHTNaive : public NonlinearSolver{
     double *HC;             /* tmp arrays for H[C] and H[wC] */
     double *Hw_mult_C;
 
-    double *tmp;            /* tmp array */
+    double *tmp;            /* help storage */
+
+    double *J;              /* matrix, contains J0 values */
 
     void initConvolving(const Problem &p);
     void clearConvolving();
