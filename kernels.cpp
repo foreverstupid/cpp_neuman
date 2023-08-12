@@ -36,3 +36,10 @@ double NormalKernels::getR() const
 
     return fmax(xm, xw);
 }
+
+
+
+double ConstKernels::getR() const
+{
+    return 5 * fmax(rm, rw);
+}

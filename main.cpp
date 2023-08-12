@@ -23,6 +23,7 @@
 "    e - exponential Danchencko kernels\n"\
 "    r - roughgarden kernels\n"\
 "    p - exponent polynomial kernels\n"\
+"    c - constant kernels\n"\
 "    After kernel type you must write kernel parameters:\n"\
 "      + birth and death kernel dispertion for normal kernels\n"\
 "      + s0 and s1 parameters for kurtic kernels\n"\
@@ -30,6 +31,7 @@
 "      + A and B parameters for Danchencko kernels\n"\
 "      + sm, gamma_m, sw and gamma_w parameters for roughgarden kernels\n"\
 "      + am, bm, aw and bw parameters for exponent polynomial kernels\n"\
+"      + birth and death radius for constatnt kernels\n"\
 "-A - alpha parameter of second order closure\n"\
 "-B - beta parameter of second order closure\n"\
 "-G - gamma parameter of second order closure\n"\

@@ -203,6 +203,12 @@ int Problem::setKernels(int *i, char **argv)
                 str2double(argv[*i + 2])
             );
             break;
+        case 'c':
+            kernels = new ConstKernels(
+                str2double(argv[*i + 1]),
+                str2double(argv[*i + 2])
+            );
+            break;;
         default:
             fprintf(stderr, "### Unknown kernel type '%s'\n", argv[*i]);
             return kernel_type_error;

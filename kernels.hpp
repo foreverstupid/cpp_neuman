@@ -170,4 +170,32 @@ public:
     }
 };
 
+
+
+class ConstKernels : public Kernels{
+    double rm;
+    double rw;
+    double mValue;
+    double wValue;
+
+public:
+    ConstKernels(double rm, double rw)
+        : rm(rm), rw(rw), mValue(0.5 / rm), wValue(0.5 / rw) {}
+
+    double getRM() const { return rm; }
+    double getRW() const { return rw; }
+
+    double m(double x) const
+    {
+        return x <= rm ? mValue : 0;
+    }
+
+    double w(double x) const
+    {
+        return x <= rw ? wValue : 0;
+    }
+
+    double getR() const;
+};
+
 #endif
