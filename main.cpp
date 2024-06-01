@@ -9,26 +9,25 @@
 "This program is used for solving an integral equation that appears\n"\
 "in the Ulf Dieckmann and Richard Law's biological model of one species.\n"\
 "This equation describes the second spatial moment in the equilibrium state.\n"\
-"The program uses the general second order closure of the third moment:\n\n"\
+"The program uses the second order closure of the third moment:\n\n"\
 "              1   C(x)C(y)    C(x)C(y-x)    C(y)C(y-x)\n"\
 "    T(x, y) =---(A-------- + B---------- + G---------- - BN^3)\n"\
 "             A+B     N            N             N\n\n"\
 "where A, B and G are alpha, beta and gamma parameters respectively.\n"\
-"The Neuman method on a discrete grid is used for solving.\n\n"\
 "List of possible cmd arguments:\n"\
 "-k*   - set kernel type, where * is one of the letters:\n"\
 "    n - normal kernels\n"\
 "    k - kurtic kernels where m(x) = w(x)\n"\
 "    K - general kurtic kernels\n"\
-"    e - exponential Danchencko kernels\n"\
+"    e - exponential Danchencko's kernels\n"\
 "    r - roughgarden kernels\n"\
 "    p - exponent polynomial kernels\n"\
 "    c - constant kernels\n"\
 "    After kernel type you must write kernel parameters:\n"\
-"      + birth and death kernel dispertion for normal kernels\n"\
+"      + birth and death kernel standard deviation for normal kernels\n"\
 "      + s0 and s1 parameters for kurtic kernels\n"\
 "      + s0m, s1m, s0w and s1w parameters for general kurtic kernels\n"\
-"      + A and B parameters for Danchencko kernels\n"\
+"      + A and B parameters for Danchencko's kernels\n"\
 "      + sm, gamma_m, sw and gamma_w parameters for roughgarden kernels\n"\
 "      + am, bm, aw and bw parameters for exponent polynomial kernels\n"\
 "      + birth and death radius for constatnt kernels\n"\
@@ -44,7 +43,7 @@
 "     closure (A = 1, B = G = 0). That makes equilibrium equation\n"\
 "     linear one. Moreover LINEAR methods are used only in the 1D or 3D\n"\
 "     case.\n"\
-"-d - environment death rating\n"\
+"-d - environmental death rating\n"\
 "-b - species birth rating\n"\
 "-s - species death rating\n"\
 "-r - size of area (give 'n' to use autocomputed size)\n"\
@@ -52,7 +51,7 @@
 "-i - iteration count\n"\
 "-n - grid node count\n"\
 "-p - path to store data (give 'n' to don't create a data file)\n"\
-"-e - accurancy in signs after point\n"\
+"-e - accuracy in decimal places\n"\
 "-h - show this help\n\n"\
 "See more information about this model in the papers."
 
